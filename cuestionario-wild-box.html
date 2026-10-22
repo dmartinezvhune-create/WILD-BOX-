@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cuestionario Wild Box</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --void:#060606; --void-soft:#0F0F0F; --void-card:#131313; --line:#242220;
+  --gold:#C9A84C; --gold-soft:#C9A96E; --gold-dim:#8E763A; --gold-glow:rgba(201,168,76,.08);
+  --ink:#EDE7D8; --ink-dim:#B4AC98; --ink-faint:#807A6C; --ok:#8FC9A0; --bad:#E0907E;
+  --display:"Cormorant Garamond", Georgia, serif; --caps:"Cinzel", Georgia, serif; --body:"DM Sans", system-ui, sans-serif;
+  --radius:6px; --maxw:880px; --hh:76px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--hh) + 64px)}
+body{margin:0;background:var(--void);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;padding-top:var(--hh)}
+h1,h2,h3,h4{font-family:var(--display);color:#fff;margin:0;line-height:1.15;font-weight:600;text-wrap:balance;text-align:left}
+a{color:var(--gold)}
+p{margin:0}
+p,.qh,.web,.bintro,.lede{text-align:left;hyphens:none;-webkit-hyphens:none}
+
+header.site{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,6,6,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.site-inner{max-width:1180px;margin:0 auto;padding:0 28px;height:var(--hh);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo svg{width:38px;height:38px;flex:0 0 auto}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.brand-name{font-family:var(--caps);font-weight:600;font-size:1.02rem;color:#fff;letter-spacing:.08em}
+.brand-name .search{color:var(--gold)}
+.logo-sub{font-family:var(--display);font-style:italic;font-size:.86rem;color:var(--ink-faint)}
+.site-nav{display:flex;align-items:center;gap:4px}
+.site-nav>a,.dd-btn{color:var(--ink-dim);text-decoration:none;font-family:var(--body);font-size:.9rem;font-weight:500;padding:10px 13px;background:none;border:none;cursor:pointer;border-radius:4px}
+.site-nav>a:hover,.dd-btn:hover,.dd:focus-within .dd-btn{color:var(--gold-soft)}
+.caret{font-size:.7rem;opacity:.7}
+.dd{position:relative}
+.dd-menu{position:absolute;top:100%;left:0;min-width:290px;background:var(--void-soft);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:0 0 6px 6px;padding:8px 0;display:none;box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.dd:hover .dd-menu,.dd:focus-within .dd-menu{display:block}
+.dd-menu a{display:flex;gap:10px;padding:9px 18px;color:var(--ink-dim);text-decoration:none;font-size:.88rem}
+.dd-menu a span{font-family:var(--caps);color:var(--gold-dim);font-size:.75rem;min-width:20px;padding-top:2px}
+.dd-menu a:hover{color:var(--gold-soft);background:var(--gold-glow)}
+.site-nav>a.nav-cta{background:var(--gold);color:#060606;font-weight:600;margin-left:8px;padding:11px 20px}
+.site-nav>a.nav-cta:hover{background:var(--gold-soft)}
+.menu-toggle{display:none;background:none;border:1px solid var(--line);border-radius:4px;width:44px;height:44px;cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.menu-toggle span{display:block;width:20px;height:2px;background:var(--gold)}
+
+.bar{position:sticky;top:calc(var(--hh) + env(safe-area-inset-top,0px));z-index:50;background:rgba(15,15,15,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1180px;margin:0 auto;padding:10px 28px;display:flex;align-items:center;gap:14px}
+.bar-lab{font-family:var(--caps);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);white-space:nowrap}
+.track{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .35s}
+.pct{font-variant-numeric:tabular-nums;font-size:.85rem;color:var(--gold);min-width:44px;text-align:right;font-weight:600}
+.saved{font-size:.78rem;color:var(--ink-faint);white-space:nowrap}
+
+.web-hero{padding:88px max(28px,calc((100% - 1124px)/2)) 64px;border-bottom:1px solid var(--line);
+  background:radial-gradient(ellipse at 85% 0%,rgba(201,168,76,.13),transparent 55%),radial-gradient(ellipse at 0% 100%,rgba(201,168,76,.05),transparent 50%)}
+.eyebrow{font-family:var(--caps);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.eyebrow svg{width:18px;height:18px}
+.web-hero h1{font-size:3.6rem;line-height:1.08;max-width:900px;letter-spacing:-.01em}
+.web-hero h1 em{font-style:italic;color:var(--gold)}
+.lede{max-width:720px;font-size:1.12rem;color:var(--ink-dim);margin-top:18px}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.btn-primary,.btn-secondary{display:inline-block;text-decoration:none;font-family:var(--body);font-weight:600;font-size:.95rem;padding:15px 26px;border-radius:4px;transition:.15s;text-align:center}
+.btn-primary{background:var(--gold);color:#060606}
+.btn-primary:hover{background:var(--gold-soft)}
+.btn-secondary{border:1px solid var(--gold-dim);color:var(--gold-soft)}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:46px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;max-width:900px}
+.hero-stats>div{background:var(--void-soft);padding:20px 18px}
+.hero-stats .n{display:block;font-family:var(--display);font-weight:700;font-size:2rem;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
+.hero-stats .l{display:block;font-size:.78rem;color:var(--ink-dim);margin-top:8px;line-height:1.35}
+.promise{margin-top:26px;padding:20px 24px;background:var(--void-card);border-left:2px solid var(--gold);border-radius:0 6px 6px 0;max-width:900px;font-family:var(--display);font-size:1.25rem;font-weight:600;font-style:italic;color:var(--gold-soft);text-align:left}
+.hero-meta{margin-top:26px;font-size:.8rem;color:var(--ink-faint);display:flex;flex-wrap:wrap;gap:8px}
+.hero-meta strong{color:var(--gold);font-weight:600}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding-inline:28px}
+.sect{padding-block:52px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:16px}
+.section-tag{font-family:var(--caps);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-dim);font-weight:600}
+.sect h2,.bhead h2,.send h2{font-size:1.85rem}
+.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.step{background:var(--void-card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.step .num{width:34px;height:34px;border-radius:50%;background:#000;border:1px solid var(--gold-dim);color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--caps);font-weight:600;font-size:.88rem}
+.step.key .num{background:var(--gold);color:#060606;border-color:var(--gold)}
+.step h4{font-size:1.1rem}
+.step p{font-size:.9rem;color:var(--ink-dim)}
+.seal-divider{display:flex;align-items:center;gap:14px;max-width:var(--maxw);margin:0 auto;padding-inline:28px}
+.seal-divider .line{flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.seal-divider .line.right{background:linear-gradient(90deg,transparent,var(--line))}
+.seal-divider svg{width:22px;height:22px}
+.wrap .seal-divider{padding-inline:0;margin-top:44px}
+
+nav.index{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px}
+.navb{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--void-card);color:var(--ink);text-decoration:none;font-size:.9rem;transition:.15s;text-align:left}
+.navb:hover,.navb:focus-visible{border-color:var(--gold-dim);background:#171612;outline:none}
+.nb{font-family:var(--caps);color:var(--gold);font-size:.78rem}
+.np{font-variant-numeric:tabular-nums;font-size:.75rem;color:var(--ink-faint)}
+.navb.done{border-color:rgba(143,201,160,.35)}
+.navb.done .np{color:var(--ok)}
+
+.block{padding-block:52px 8px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:calc(var(--hh) + 60px)}
+.block+.block{border-top:1px solid var(--line)}
+.bhead{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.bnum{display:none}
+.bhead .section-tag::before{content:attr(data-n) " · "}
+.bintro{color:var(--ink-dim);max-width:70ch}
+.q{background:var(--void-card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:10px;min-width:0;transition:border-color .15s}
+.q:focus-within{border-color:var(--gold-dim)}
+.q.missing{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad) inset}
+.ql{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin:0;font-weight:500;color:var(--ink);text-align:left}
+.qc{font-family:var(--caps);font-size:.74rem;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:.04em}
+.qt{flex:1 1 280px;min-width:0}
+.req{font-family:var(--caps);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-dim);background:var(--gold-glow);border-radius:2px;padding:2px 8px}
+.qh{font-size:.88rem;color:var(--ink-faint)}
+input[type=text],input[type=number],textarea,select{width:100%;background:#0B0B0A;color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:11px 13px;font:inherit;font-size:.95rem;text-align:left}
+textarea{resize:vertical;min-height:86px}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.15)}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:#0B0B0A;cursor:pointer;font-size:.92rem;color:var(--ink-dim);text-align:left}
+.opt input{accent-color:var(--gold);margin-top:4px}
+.opt:hover{border-color:var(--gold-dim)}
+.opt:has(input:checked){border-color:var(--gold);background:var(--gold-glow);color:var(--ink)}
+.opt:has(input:focus-visible){outline:2px solid var(--gold)}
+.og{font-family:var(--caps);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);margin-top:8px;text-align:left}
+.gh{font-family:var(--caps);font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:22px 0 2px;font-weight:600;display:flex;align-items:center;gap:12px}
+.gh::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold-dim),transparent)}
+
+details.f{padding:0;gap:0;overflow:hidden}
+details.f>summary{list-style:none;cursor:pointer;padding:15px 20px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+details.f>summary::-webkit-details-marker{display:none}
+details.f>summary::after{content:"+";font-family:var(--display);font-size:1.5rem;color:var(--gold);line-height:1;margin-left:10px}
+details.f[open]>summary::after{content:"–"}
+details.f[open]>summary{border-bottom:1px solid var(--line);background:#161512}
+details.f>summary:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
+details.f>:not(summary){margin-inline:20px}
+details.f>:last-child{margin-bottom:20px}
+details.f .qt{font-family:var(--display);font-size:1.12rem;font-weight:600}
+.tag{display:none;font-family:var(--caps);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:#060606;background:var(--gold);border-radius:2px;padding:2px 8px}
+details.f.full-f{border-color:var(--gold-dim)}
+details.f.full-f .tag{display:inline-block}
+.fc{margin-left:auto;font-size:.75rem;color:var(--ink-faint);font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:2px;padding:1px 8px}
+.fc.full{color:var(--ok);border-color:rgba(143,201,160,.5)}
+.web{margin-top:14px;font-size:.88rem;color:var(--ink-dim);background:var(--gold-glow);border-left:2px solid var(--gold);padding:10px 14px;border-radius:0 4px 4px 0}
+.web strong{color:var(--gold);font-weight:600}
+details.f .og{margin-top:18px;margin-bottom:8px}
+.gf{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.gfi{display:flex;flex-direction:column;gap:5px;font-size:.8rem;color:var(--ink-dim);min-width:0;text-align:left}
+.gfi.wide{grid-column:1/-1}
+.gfi input,.gfi select{padding:9px 11px;font-size:.9rem}
+details.f textarea{min-height:66px}
+
+.send{margin-block:56px 20px;border:1px solid var(--gold-dim);border-radius:8px;padding:30px;background:#000;display:flex;flex-direction:column;gap:14px}
+.send h2{color:var(--gold)}
+.send>p{color:var(--ink-dim)}
+.btn{appearance:none;border:1px solid var(--gold);background:var(--gold);color:#060606;font:600 .95rem var(--body);padding:14px 24px;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block;text-align:center;transition:.15s}
+.btn:hover{background:var(--gold-soft)}
+.btn.ghost{background:transparent;color:var(--gold-soft);border-color:var(--gold-dim)}
+.btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn.sm{padding:9px 16px;font-size:.88rem}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+.msg{font-size:.88rem;color:var(--ink-dim)}
+.msg.err{color:var(--bad)}
+.msg.ok{color:var(--ok)}
+.result[hidden]{display:none}
+.result{display:flex;flex-direction:column;gap:14px;border-top:1px solid var(--line);padding-top:18px}
+.result textarea{min-height:200px;font-size:.8rem;font-family:ui-monospace,Menlo,monospace}
+.dest{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.destc{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:1px solid var(--line);border-radius:6px;padding:16px;background:var(--void-card)}
+.dl{font-family:var(--caps);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.dv{font-family:var(--display);font-size:1.3rem;font-weight:600;user-select:all;font-variant-numeric:tabular-nums}
+.txt summary{cursor:pointer;color:var(--ink-faint);font-size:.88rem}
+.txt[open]{display:flex;flex-direction:column;gap:10px}
+.hp{position:absolute;left:-9999px}
+
+.site-footer{margin-top:40px;padding:56px 28px 30px;background:var(--void-soft);border-top:1px solid var(--line)}
+.ft-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:34px}
+.ft-grid h5{font-family:var(--caps);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 12px}
+.ft-grid span,.ft-grid a{display:block;color:var(--ink-dim);text-decoration:none;font-size:.88rem;margin-bottom:8px}
+.ft-grid a:hover{color:var(--gold-soft)}
+.ft-brand p{font-size:.88rem;color:var(--ink-faint);margin-top:14px;max-width:320px;text-align:left}
+.ft-sign{font-family:var(--display);font-size:1.25rem;color:#fff;font-weight:600}
+.ft-bottom{max-width:1180px;margin:34px auto 0;padding-top:20px;border-top:1px solid var(--line);font-size:.78rem;color:var(--ink-faint)}
+
+@media (max-width:980px){
+  .menu-toggle{display:flex}
+  header.site{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--void)}
+  .site-nav{display:none;position:fixed;top:calc(var(--hh) + env(safe-area-inset-top,0px));left:0;right:0;height:calc(100vh - var(--hh));background:var(--void);flex-direction:column;align-items:stretch;gap:0;padding:12px 22px 40px;overflow-y:auto;border-top:1px solid var(--line)}
+  body.menu-open .site-nav{display:flex}
+  .site-nav>a,.dd-btn{padding:14px 4px;font-size:1rem;text-align:left;border-bottom:1px solid var(--line);border-radius:0}
+  .dd-btn{width:100%}
+  .dd-menu{display:block;position:static;border:none;box-shadow:none;background:none;padding:0 0 8px 12px;min-width:0}
+  .dd-menu a{padding:10px 4px}
+  .site-nav>a.nav-cta{margin:18px 0 0;text-align:center;border-bottom:none}
+  .web-hero{padding:56px 22px 46px}
+  .site-inner,.bar-in{padding-inline:18px}
+  .wrap,.seal-divider{padding-inline:20px}
+  .web-hero h1{font-size:2.4rem}
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .ft-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:620px){
+  .steps{grid-template-columns:1fr}
+  .bar-lab,.saved{display:none}
+  .send{padding:22px}
+}
+@media (max-width:520px){
+  .web-hero h1{font-size:2rem}
+  .logo-sub{display:none}
+  .ft-grid{grid-template-columns:1fr}
+  .btn-primary,.btn-secondary{width:100%}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.fill{transition:none}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="logo" href="#top"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="logo-text"><span class="brand-name">CLOSER<span class="search"> SEARCH</span></span><span class="logo-sub">Selección de talento de cierre</span></span></a>
+    <button class="menu-toggle" type="button" aria-label="Abrir el menú" id="mt"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="sn" aria-label="Secciones"><div class="dd"><button class="dd-btn" type="button">Wild Box <span class="caret">▾</span></button><div class="dd-menu"><a href="#b01"><span>01</span>Quién eres y quién decide</a><a href="#b02"><span>02</span>Dónde actuaría el equipo de cierre</a><a href="#b03"><span>03</span>Volumen y resultados</a></div></div><div class="dd"><button class="dd-btn" type="button">Oferta <span class="caret">▾</span></button><div class="dd-menu"><a href="#b04"><span>04</span>Programas · ficha de cada uno</a></div></div><div class="dd"><button class="dd-btn" type="button">Clientes y venta <span class="caret">▾</span></button><div class="dd-menu"><a href="#b05"><span>05</span>Tu cliente ideal</a><a href="#b06"><span>06</span>Captación, campañas y herramientas</a><a href="#b07"><span>07</span>Tu proceso de venta hoy</a><a href="#b08"><span>08</span>Mensaje, objeciones y límites</a><a href="#b09"><span>09</span>Pagos y pago fraccionado</a><a href="#b10"><span>10</span>Prueba social y reputación</a></div></div><div class="dd"><button class="dd-btn" type="button">Colaboración <span class="caret">▾</span></button><div class="dd-menu"><a href="#b11"><span>11</span>Cómo trabajaríamos juntos</a><a href="#b12"><span>12</span>Documentos y accesos</a></div></div><a class="nav-cta" href="#send">Generar el PDF</a></nav>
+  </div>
+</header>
+
+<main id="top">
+<div class="web-hero">
+  <div class="eyebrow"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Cuestionario de colaboración · Wild Box</div>
+  <h1>Conocer Wild Box a fondo para <em>representar bien lo que ofreces.</em></h1>
+  <p class="lede">Para preparar una propuesta que tenga sentido para Wild Box, partimos de lo que nos contaste en la llamada y necesitamos concretarlo: los programas y sus precios, a quién van, cómo te llegarán los contactos con las nuevas campañas, cómo funcionan hoy la cita presencial y la llamada online, cómo se cobra y qué se puede decir y prometer en una conversación. Con tus respuestas preparamos la propuesta de colaboración y todo el material para que el equipo de cierre represente a Wild Box con tu mismo criterio desde el primer día.</p>
+  <div class="hero-ctas">
+    <a class="btn-primary" href="#b02">Empezar por el bloque 02</a>
+    <a class="btn-secondary" href="#como">Cómo rellenarlo</a>
+  </div>
+  <div class="hero-stats">
+    <div><span class="n">12</span><span class="l">bloques temáticos</span></div>
+    <div><span class="n">55</span><span class="l">preguntas imprescindibles</span></div>
+    <div><span class="n">8</span><span class="l">programas y servicios, con su ficha</span></div>
+    <div><span class="n">45–60 min</span><span class="l">tiempo aproximado, en una o varias sesiones</span></div>
+  </div>
+  <div class="promise">«Un equipo de cierre solo puede representar bien lo que conoce a fondo. Por eso empezamos preguntando.»</div>
+  <div class="hero-meta"><span><strong>Para</strong> José Antonio · Wild Box</span><span>·</span><span><strong>De</strong> Closer Search</span></div>
+</div>
+
+<div class="bar" role="status" aria-live="polite"><div class="bar-in"><span class="bar-lab">Tu avance</span><div class="track"><div class="fill" id="fill"></div></div><span class="pct" id="pct">0 %</span><span class="saved" id="saved">Sin respuestas</span></div></div>
+
+<div class="wrap">
+<section class="sect" id="como">
+  <div class="section-tag">Antes de empezar</div>
+  <h2>Cómo rellenarlo</h2>
+  <div class="steps">
+    <div class="step key"><span class="num">1</span><h4>Empieza por el bloque 02</h4><p>Marca los programas y servicios en los que quieres que trabaje el equipo de cierre. Sus fichas se abrirán completas; del resto solo te pediremos cinco datos básicos.</p></div>
+    <div class="step"><span class="num">2</span><h4>Datos reales, aunque sean aproximados</h4><p>Si no tienes una cifra exacta, una aproximación nos sirve; si no la tienes, escribe «no lo sé». Las preguntas marcadas como imprescindibles son las que necesitamos para preparar la propuesta.</p></div>
+    <div class="step"><span class="num">3</span><h4>Se guarda solo</h4><p>Las respuestas se guardan en este navegador: puedes dejarlo a medias y volver después desde el mismo dispositivo.</p></div>
+    <div class="step"><span class="num">4</span><h4>Al terminar, un PDF</h4><p>Pulsa «Terminar y generar el PDF» y envíanoslo por WhatsApp o por email. Incluye todas las preguntas y tus respuestas.</p></div>
+    <div class="step"><span class="num">5</span><h4>Confidencial</h4><p>Toda la información es confidencial y solo la usaremos para preparar esta colaboración. Si lo prefieres, firmamos antes un acuerdo de confidencialidad.</p></div>
+    <div class="step key"><span class="num">6</span><h4>Un informe para ti</h4><p>Decidas lo que decidas, te enviaremos un informe con lo que hemos visto de tu negocio.</p></div>
+  </div>
+</section>
+
+<section class="sect">
+  <div class="section-tag">Índice</div>
+  <h2>Bloques del cuestionario</h2>
+  <nav class="index" aria-label="Bloques del cuestionario">
+<a href="#b01" class="navb" data-b="1"><span class="nb">01</span><span class="nt">Quién eres y quién decide</span><span class="np" id="np1">0/8</span></a>
+<a href="#b02" class="navb" data-b="2"><span class="nb">02</span><span class="nt">Dónde actuaría el equipo de cierre</span><span class="np" id="np2">0/6</span></a>
+<a href="#b03" class="navb" data-b="3"><span class="nb">03</span><span class="nt">Volumen y resultados</span><span class="np" id="np3">0/9</span></a>
+<a href="#b04" class="navb" data-b="4"><span class="nb">04</span><span class="nt">Programas · ficha de cada uno</span><span class="np" id="np4">0/8</span></a>
+<a href="#b05" class="navb" data-b="5"><span class="nb">05</span><span class="nt">Tu cliente ideal</span><span class="np" id="np5">0/13</span></a>
+<a href="#b06" class="navb" data-b="6"><span class="nb">06</span><span class="nt">Captación, campañas y herramientas</span><span class="np" id="np6">0/13</span></a>
+<a href="#b07" class="navb" data-b="7"><span class="nb">07</span><span class="nt">Tu proceso de venta hoy</span><span class="np" id="np7">0/12</span></a>
+<a href="#b08" class="navb" data-b="8"><span class="nb">08</span><span class="nt">Mensaje, objeciones y límites</span><span class="np" id="np8">0/12</span></a>
+<a href="#b09" class="navb" data-b="9"><span class="nb">09</span><span class="nt">Pagos y pago fraccionado</span><span class="np" id="np9">0/10</span></a>
+<a href="#b10" class="navb" data-b="10"><span class="nb">10</span><span class="nt">Prueba social y reputación</span><span class="np" id="np10">0/5</span></a>
+<a href="#b11" class="navb" data-b="11"><span class="nb">11</span><span class="nt">Cómo trabajaríamos juntos</span><span class="np" id="np11">0/5</span></a>
+<a href="#b12" class="navb" data-b="12"><span class="nb">12</span><span class="nt">Documentos y accesos</span><span class="np" id="np12">0/2</span></a>
+  </nav>
+</section>
+
+<form id="f" name="cuestionario-wildbox" method="POST" data-netlify="true" netlify-honeypot="bot-field" novalidate>
+<input type="hidden" name="form-name" value="cuestionario-wildbox">
+<p class="hp"><label>No rellenar <input name="bot-field" tabindex="-1" autocomplete="off"></label><input type="file" name="pdf-respuestas" tabindex="-1" aria-hidden="true"></p>
+<section class="block" id="b01" data-b="1">
+<div class="bhead"><span class="bnum">01</span><div class="section-tag" data-n="01">Bloque</div><h2>Quién eres y quién decide</h2><p class="bintro">Para saber con quién hablamos y cómo está organizado Wild Box.</p></div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0101"><span class="qc">01.01</span><span class="qt">Tu nombre y tu papel en Wild Box</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0101" name="01.01 nombre_papel_wild_box" required>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0102"><span class="qc">01.02</span><span class="qt">Email y teléfono de contacto</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0102" name="01.02 email_telefono_contacto" required>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0103"><span class="qc">01.03</span><span class="qt">¿Quién decide sobre esta colaboración? ¿Hay socios que tengan que aprobarla y en qué plazo podéis decidir?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0103" name="01.03 decide_sobre_esta_colaboracion_hay_socios" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0104"><span class="qc">01.04</span><span class="qt">¿Quién será nuestro interlocutor en el día a día?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Nombre, email y teléfono.</p>
+<input type="text" id="q0104" name="01.04 sera_nuestro_interlocutor_dia_dia" required>
+</div>
+<div class="q" data-req="1" data-type="s">
+<label class="ql" for="q0105"><span class="qc">01.05</span><span class="qt">¿Cuántas horas a la semana puede dedicar esa persona al equipo de cierre durante el primer mes?</span><span class="req">Imprescindible</span></label>
+<select id="q0105" name="01.05 horas_semana_puede_dedicar_esa_persona" required><option value="">Elige una opción</option><option>Menos de 1 hora</option><option>1–2 horas</option><option>3–4 horas</option><option>Más de 4 horas</option></select>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0106"><span class="qc">01.06</span><span class="qt">¿Cuántas personas trabajáis en Wild Box y en qué?</span></label>
+<p class="qh">Entrenadores, readaptadores, fisioterapeutas, nutricionista, atención por WhatsApp, contenido…</p>
+<textarea id="q0106" name="01.06 personas_trabajais_wild_box" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0107"><span class="qc">01.07</span><span class="qt">¿Facturas como autónomo o como sociedad? ¿Interviene alguna otra entidad?</span></label>
+<textarea id="q0107" name="01.07 facturas_autonomo_sociedad_interviene_alguna_otra" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0108"><span class="qc">01.08</span><span class="qt">¿Dónde está el centro y desde dónde atiendes a los clientes online?</span></label>
+<p class="qh">En tus publicaciones aparece C/ Portichuelo 7B, Salobreña. Confírmalo o corrígelo.</p>
+<textarea id="q0108" name="01.08 donde_esta_centro_desde_donde_atiendes" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b02" data-b="2">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">02</span><div class="section-tag" data-n="02">Bloque</div><h2>Dónde actuaría el equipo de cierre</h2><p class="bintro">Empieza por aquí. En la llamada hablamos de arrancar con dos setters, uno para la campaña online y otro para el canal local, y de decidir quién hace el cierre. Aquí lo concretamos. Marca también los programas en los que quieres que trabaje el equipo: sus fichas se abrirán completas en el bloque 04.</p></div>
+<div class="q" data-req="1" data-type="c">
+<p class="ql"><span class="qc">02.01</span><span class="qt">¿En qué programas y servicios quieres que trabaje el equipo de cierre?</span><span class="req">Imprescindible</span></p>
+<p class="og">Programa de pérdida de peso · online</p><div class="opts" role="group" data-select="1">
+<label class="opt"><input type="checkbox" id="q0201_1" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Programa online · Básico"><span>Programa online · Básico</span></label>
+<label class="opt"><input type="checkbox" id="q0201_2" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Programa online · Premium"><span>Programa online · Premium</span></label>
+</div>
+<p class="og">Canal local · presencial en Salobreña</p><div class="opts" role="group" data-select="1">
+<label class="opt"><input type="checkbox" id="q0201_3" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Programa presencial (canal local)"><span>Programa presencial (canal local)</span></label>
+<label class="opt"><input type="checkbox" id="q0201_4" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Readaptación de lesiones"><span>Readaptación de lesiones</span></label>
+</div>
+<p class="og">Otros programas y retos</p><div class="opts" role="group" data-select="1">
+<label class="opt"><input type="checkbox" id="q0201_5" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Starter Performance"><span>Starter Performance</span></label>
+<label class="opt"><input type="checkbox" id="q0201_6" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Reto Wild Box"><span>Reto Wild Box</span></label>
+</div>
+<p class="og">Otras líneas de negocio</p><div class="opts" role="group" data-select="1">
+<label class="opt"><input type="checkbox" id="q0201_7" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Otra línea de negocio (1)"><span>Otra línea de negocio (1)</span></label>
+<label class="opt"><input type="checkbox" id="q0201_8" name="02.01 programas_servicios_quieres_trabaje_equipo_cierre[]" value="Otra línea de negocio (2)"><span>Otra línea de negocio (2)</span></label>
+</div>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0202"><span class="qc">02.02</span><span class="qt">Ordena los que has marcado por prioridad y cuéntanos por qué</span><span class="req">Imprescindible</span></label>
+<textarea id="q0202" name="02.02 ordena_has_marcado_prioridad_cuentanos" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="r">
+<p class="ql"><span class="qc">02.03</span><span class="qt">¿Confirmas la estructura de dos setters: uno para la campaña online y otro para el canal local, que solo agenda citas presenciales?</span><span class="req">Imprescindible</span></p>
+<div class="opts" role="group">
+<label class="opt"><input type="radio" id="q0203_1" name="02.03 confirmas_estructura_dos_setters_uno_campana" value="Sí, así"><span>Sí, así</span></label>
+<label class="opt"><input type="radio" id="q0203_2" name="02.03 confirmas_estructura_dos_setters_uno_campana" value="Prefiero empezar con uno solo"><span>Prefiero empezar con uno solo</span></label>
+<label class="opt"><input type="radio" id="q0203_3" name="02.03 confirmas_estructura_dos_setters_uno_campana" value="Lo quiero hablar"><span>Lo quiero hablar</span></label>
+</div>
+</div>
+<div class="q" data-req="1" data-type="r">
+<p class="ql"><span class="qc">02.04</span><span class="qt">¿Quién haría el cierre?</span><span class="req">Imprescindible</span></p>
+<div class="opts" role="group">
+<label class="opt"><input type="radio" id="q0204_1" name="02.04 haria_cierre" value="Yo cierro lo local y un closer lo online"><span>Yo cierro lo local y un closer lo online</span></label>
+<label class="opt"><input type="radio" id="q0204_2" name="02.04 haria_cierre" value="Yo cierro todo, el equipo solo agenda"><span>Yo cierro todo, el equipo solo agenda</span></label>
+<label class="opt"><input type="radio" id="q0204_3" name="02.04 haria_cierre" value="Lo delego todo en el equipo"><span>Lo delego todo en el equipo</span></label>
+<label class="opt"><input type="radio" id="q0204_4" name="02.04 haria_cierre" value="Un perfil mixto (setter y closer) para lo online"><span>Un perfil mixto (setter y closer) para lo online</span></label>
+<label class="opt"><input type="radio" id="q0204_5" name="02.04 haria_cierre" value="Aún no lo tengo claro"><span>Aún no lo tengo claro</span></label>
+</div>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0205"><span class="qc">02.05</span><span class="qt">¿Qué esperas conseguir con el equipo en los primeros 3 meses?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Citas agendadas, ventas, liberar tu tiempo…</p>
+<textarea id="q0205" name="02.05 esperas_conseguir_equipo_primeros_3_meses" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0206"><span class="qc">02.06</span><span class="qt">¿Qué parte del proceso quieres conservar tú sí o sí?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0206" name="02.06 parte_proceso_quieres_conservar_si_si" rows="3" required></textarea>
+</div>
+</section>
+<section class="block" id="b03" data-b="3">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">03</span><div class="section-tag" data-n="03">Bloque</div><h2>Volumen y resultados</h2><p class="bintro">Las cifras de hoy y las previstas con las nuevas campañas. Es lo que decide si un closer dedicado compensa o si conviene un perfil mixto. Si no tienes el dato exacto, una aproximación honesta nos sirve.</p></div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0301"><span class="qc">03.01</span><span class="qt">¿Cuántos contactos te entran hoy al mes, separando online y local?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0301" name="03.01 contactos_entran_mes_separando_online_local" required>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0302"><span class="qc">03.02</span><span class="qt">¿Cuántos esperas que entren al mes cuando arranquen las nuevas campañas?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0302" name="03.02 esperas_entren_mes_cuando_arranquen_nuevas" required>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0303"><span class="qc">03.03</span><span class="qt">¿Qué presupuesto mensual vas a invertir en publicidad, online y local?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0303" name="03.03 presupuesto_mensual_vas_invertir_publicidad_online" required>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0304"><span class="qc">03.04</span><span class="qt">¿Cuántos clientes activos tienes ahora en el programa, online y presenciales?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0304" name="03.04 clientes_activos_tienes_ahora_programa_online" required>
+</div>
+<div class="q" data-req="0" data-type="t">
+<label class="ql" for="q0305"><span class="qc">03.05</span><span class="qt">¿Cuántas ventas cierras al mes de media y de qué producto?</span></label>
+<input type="text" id="q0305" name="03.05 ventas_cierras_mes_media_producto">
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0306"><span class="qc">03.06</span><span class="qt">¿Qué porcentaje de la facturación viene del online y qué porcentaje del presencial?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0306" name="03.06 porcentaje_facturacion_viene_online_porcentaje_presencial" required>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0307"><span class="qc">03.07</span><span class="qt">¿Qué objetivo de clientes o facturación tienes para los próximos 12 meses?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0307" name="03.07 objetivo_clientes_facturacion_tienes_proximos_12" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0308"><span class="qc">03.08</span><span class="qt">¿Cuántos clientes más puedes atender sin perder calidad (grupos, nutricionista, entrenador)?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0308" name="03.08 clientes_puedes_atender_sin_perder_calidad" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0309"><span class="qc">03.09</span><span class="qt">¿En qué meses entran más clientes y en cuáles menos?</span></label>
+<p class="qh">Enero, antes del verano, septiembre…</p>
+<textarea id="q0309" name="03.09 meses_entran_clientes_menos" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b04" data-b="4">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">04</span><div class="section-tag" data-n="04">Bloque</div><h2>Programas · ficha de cada uno</h2><p class="bintro">Todas las fichas piden cinco datos básicos. Las de los programas que has marcado en el bloque 02 se abren completas: con ellas preparamos el material del equipo para cada programa. Debajo del nombre verás lo que nos contaste en la llamada y lo que hemos visto en tu Instagram, para que lo confirmes o corrijas.</p></div>
+<h3 class="gh">Programa de pérdida de peso · online</h3>
+<details class="q f" data-req="0" data-type="f" data-item="Programa online · Básico"><summary class="ql"><span class="qc">04.01</span><span class="qt">Programa online · Básico</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="web"><strong>Lo que ya sabemos:</strong> En la llamada nos contaste que es el que más se vende: programa de 3 meses para bajar de peso sin dieta, basado en nutrición, con sesiones en grupo, videollamada con entrenador y nutricionista y app de seguimiento. Entendimos un precio de entre 420 y 540 € (también se oyó 499 €). Confírmalo.</p>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0401_01" name="04.01 programa_online_basico · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0401_02" name="04.01 programa_online_basico · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0401_03" name="04.01 programa_online_basico · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0401_04" name="04.01 programa_online_basico · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0401_05" name="04.01 programa_online_basico · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0401_06" name="04.01 programa_online_basico · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0401_07" name="04.01 programa_online_basico · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0401_08" name="04.01 programa_online_basico · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0401_09" name="04.01 programa_online_basico · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0401_10" name="04.01 programa_online_basico · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0401_11" name="04.01 programa_online_basico · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0401_12" name="04.01 programa_online_basico · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0401_13" name="04.01 programa_online_basico · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0401_14" name="04.01 programa_online_basico · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0401_15" name="04.01 programa_online_basico · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0401_16" name="04.01 programa_online_basico · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0401_17" name="04.01 programa_online_basico · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0401_18" name="04.01 programa_online_basico · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0401_19" name="04.01 programa_online_basico · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0401_20" name="04.01 programa_online_basico · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0401_21" name="04.01 programa_online_basico · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0401_22" name="04.01 programa_online_basico · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0401_23" name="04.01 programa_online_basico · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0401_24" name="04.01 programa_online_basico · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0401_25" name="04.01 programa_online_basico · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0401_26" name="04.01 programa_online_basico · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0401_27" name="04.01 programa_online_basico · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0401_28" name="04.01 programa_online_basico · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<details class="q f" data-req="0" data-type="f" data-item="Programa online · Premium"><summary class="ql"><span class="qc">04.02</span><span class="qt">Programa online · Premium</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="web"><strong>Lo que ya sabemos:</strong> En la llamada entendimos un precio de unos 999 € y que te da mucho trabajo para la rentabilidad que deja. Confirma precio y qué incluye de más respecto al básico, y si lo quieres mantener así o ajustarlo.</p>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0402_01" name="04.02 programa_online_premium · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0402_02" name="04.02 programa_online_premium · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0402_03" name="04.02 programa_online_premium · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0402_04" name="04.02 programa_online_premium · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0402_05" name="04.02 programa_online_premium · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0402_06" name="04.02 programa_online_premium · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0402_07" name="04.02 programa_online_premium · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0402_08" name="04.02 programa_online_premium · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0402_09" name="04.02 programa_online_premium · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0402_10" name="04.02 programa_online_premium · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0402_11" name="04.02 programa_online_premium · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0402_12" name="04.02 programa_online_premium · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0402_13" name="04.02 programa_online_premium · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0402_14" name="04.02 programa_online_premium · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0402_15" name="04.02 programa_online_premium · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0402_16" name="04.02 programa_online_premium · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0402_17" name="04.02 programa_online_premium · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0402_18" name="04.02 programa_online_premium · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0402_19" name="04.02 programa_online_premium · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0402_20" name="04.02 programa_online_premium · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0402_21" name="04.02 programa_online_premium · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0402_22" name="04.02 programa_online_premium · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0402_23" name="04.02 programa_online_premium · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0402_24" name="04.02 programa_online_premium · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0402_25" name="04.02 programa_online_premium · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0402_26" name="04.02 programa_online_premium · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0402_27" name="04.02 programa_online_premium · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0402_28" name="04.02 programa_online_premium · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<h3 class="gh">Canal local · presencial en Salobreña</h3>
+<details class="q f" data-req="0" data-type="f" data-item="Programa presencial (canal local)"><summary class="ql"><span class="qc">04.03</span><span class="qt">Programa presencial (canal local)</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="web"><strong>Lo que ya sabemos:</strong> En la llamada nos contaste que es el mismo producto que el online, con otra presentación y otro precio, y que en este canal se agenda una cita presencial en el centro. Confirma precio, diferencias y quién hace esa cita.</p>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0403_01" name="04.03 programa_presencial_canal_local · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0403_02" name="04.03 programa_presencial_canal_local · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0403_03" name="04.03 programa_presencial_canal_local · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0403_04" name="04.03 programa_presencial_canal_local · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0403_05" name="04.03 programa_presencial_canal_local · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0403_06" name="04.03 programa_presencial_canal_local · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0403_07" name="04.03 programa_presencial_canal_local · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0403_08" name="04.03 programa_presencial_canal_local · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0403_09" name="04.03 programa_presencial_canal_local · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0403_10" name="04.03 programa_presencial_canal_local · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0403_11" name="04.03 programa_presencial_canal_local · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0403_12" name="04.03 programa_presencial_canal_local · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0403_13" name="04.03 programa_presencial_canal_local · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0403_14" name="04.03 programa_presencial_canal_local · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0403_15" name="04.03 programa_presencial_canal_local · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0403_16" name="04.03 programa_presencial_canal_local · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0403_17" name="04.03 programa_presencial_canal_local · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0403_18" name="04.03 programa_presencial_canal_local · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0403_19" name="04.03 programa_presencial_canal_local · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0403_20" name="04.03 programa_presencial_canal_local · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0403_21" name="04.03 programa_presencial_canal_local · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0403_22" name="04.03 programa_presencial_canal_local · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0403_23" name="04.03 programa_presencial_canal_local · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0403_24" name="04.03 programa_presencial_canal_local · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0403_25" name="04.03 programa_presencial_canal_local · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0403_26" name="04.03 programa_presencial_canal_local · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0403_27" name="04.03 programa_presencial_canal_local · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0403_28" name="04.03 programa_presencial_canal_local · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<details class="q f" data-req="0" data-type="f" data-item="Readaptación de lesiones"><summary class="ql"><span class="qc">04.04</span><span class="qt">Readaptación de lesiones</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="web"><strong>Lo que ya sabemos:</strong> Aparece en el nombre de tu perfil: «Entrenamiento y Readaptación de lesiones». No lo tratamos en la llamada: dinos si es una línea propia y si quieres incluirla.</p>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0404_01" name="04.04 readaptacion_lesiones · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0404_02" name="04.04 readaptacion_lesiones · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0404_03" name="04.04 readaptacion_lesiones · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0404_04" name="04.04 readaptacion_lesiones · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0404_05" name="04.04 readaptacion_lesiones · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0404_06" name="04.04 readaptacion_lesiones · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0404_07" name="04.04 readaptacion_lesiones · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0404_08" name="04.04 readaptacion_lesiones · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0404_09" name="04.04 readaptacion_lesiones · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0404_10" name="04.04 readaptacion_lesiones · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0404_11" name="04.04 readaptacion_lesiones · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0404_12" name="04.04 readaptacion_lesiones · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0404_13" name="04.04 readaptacion_lesiones · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0404_14" name="04.04 readaptacion_lesiones · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0404_15" name="04.04 readaptacion_lesiones · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0404_16" name="04.04 readaptacion_lesiones · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0404_17" name="04.04 readaptacion_lesiones · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0404_18" name="04.04 readaptacion_lesiones · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0404_19" name="04.04 readaptacion_lesiones · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0404_20" name="04.04 readaptacion_lesiones · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0404_21" name="04.04 readaptacion_lesiones · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0404_22" name="04.04 readaptacion_lesiones · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0404_23" name="04.04 readaptacion_lesiones · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0404_24" name="04.04 readaptacion_lesiones · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0404_25" name="04.04 readaptacion_lesiones · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0404_26" name="04.04 readaptacion_lesiones · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0404_27" name="04.04 readaptacion_lesiones · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0404_28" name="04.04 readaptacion_lesiones · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<h3 class="gh">Otros programas y retos</h3>
+<details class="q f" data-req="0" data-type="f" data-item="Starter Performance"><summary class="ql"><span class="qc">04.05</span><span class="qt">Starter Performance</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="web"><strong>Lo que ya sabemos:</strong> Aparece en una publicación fijada, para quien nunca ha entrenado. No lo tratamos en la llamada: dinos si sigue activo y cómo encaja con el programa de pérdida de peso.</p>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0405_01" name="04.05 starter_performance · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0405_02" name="04.05 starter_performance · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0405_03" name="04.05 starter_performance · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0405_04" name="04.05 starter_performance · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0405_05" name="04.05 starter_performance · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0405_06" name="04.05 starter_performance · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0405_07" name="04.05 starter_performance · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0405_08" name="04.05 starter_performance · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0405_09" name="04.05 starter_performance · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0405_10" name="04.05 starter_performance · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0405_11" name="04.05 starter_performance · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0405_12" name="04.05 starter_performance · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0405_13" name="04.05 starter_performance · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0405_14" name="04.05 starter_performance · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0405_15" name="04.05 starter_performance · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0405_16" name="04.05 starter_performance · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0405_17" name="04.05 starter_performance · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0405_18" name="04.05 starter_performance · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0405_19" name="04.05 starter_performance · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0405_20" name="04.05 starter_performance · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0405_21" name="04.05 starter_performance · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0405_22" name="04.05 starter_performance · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0405_23" name="04.05 starter_performance · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0405_24" name="04.05 starter_performance · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0405_25" name="04.05 starter_performance · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0405_26" name="04.05 starter_performance · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0405_27" name="04.05 starter_performance · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0405_28" name="04.05 starter_performance · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<details class="q f" data-req="0" data-type="f" data-item="Reto Wild Box"><summary class="ql"><span class="qc">04.06</span><span class="qt">Reto Wild Box</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="web"><strong>Lo que ya sabemos:</strong> Aparece como #RetoWildBox en las publicaciones de cambios físicos. No lo tratamos en la llamada: dinos si es un producto aparte o parte del programa.</p>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0406_01" name="04.06 reto_wild_box · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0406_02" name="04.06 reto_wild_box · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0406_03" name="04.06 reto_wild_box · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0406_04" name="04.06 reto_wild_box · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0406_05" name="04.06 reto_wild_box · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0406_06" name="04.06 reto_wild_box · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0406_07" name="04.06 reto_wild_box · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0406_08" name="04.06 reto_wild_box · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0406_09" name="04.06 reto_wild_box · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0406_10" name="04.06 reto_wild_box · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0406_11" name="04.06 reto_wild_box · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0406_12" name="04.06 reto_wild_box · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0406_13" name="04.06 reto_wild_box · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0406_14" name="04.06 reto_wild_box · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0406_15" name="04.06 reto_wild_box · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0406_16" name="04.06 reto_wild_box · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0406_17" name="04.06 reto_wild_box · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0406_18" name="04.06 reto_wild_box · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0406_19" name="04.06 reto_wild_box · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0406_20" name="04.06 reto_wild_box · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0406_21" name="04.06 reto_wild_box · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0406_22" name="04.06 reto_wild_box · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0406_23" name="04.06 reto_wild_box · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0406_24" name="04.06 reto_wild_box · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0406_25" name="04.06 reto_wild_box · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0406_26" name="04.06 reto_wild_box · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0406_27" name="04.06 reto_wild_box · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0406_28" name="04.06 reto_wild_box · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<h3 class="gh">Otras líneas de negocio</h3>
+<details class="q f" data-req="0" data-type="f" data-item="Otra línea de negocio (1)"><summary class="ql"><span class="qc">04.07</span><span class="qt">Otra línea de negocio (1)</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi wide">Nombre de la línea<input type="text" id="q0407_00" name="04.07 otra_linea_negocio_1 · nombre_linea"></label>
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0407_01" name="04.07 otra_linea_negocio_1 · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0407_02" name="04.07 otra_linea_negocio_1 · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0407_03" name="04.07 otra_linea_negocio_1 · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0407_04" name="04.07 otra_linea_negocio_1 · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0407_05" name="04.07 otra_linea_negocio_1 · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0407_06" name="04.07 otra_linea_negocio_1 · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0407_07" name="04.07 otra_linea_negocio_1 · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0407_08" name="04.07 otra_linea_negocio_1 · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0407_09" name="04.07 otra_linea_negocio_1 · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0407_10" name="04.07 otra_linea_negocio_1 · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0407_11" name="04.07 otra_linea_negocio_1 · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0407_12" name="04.07 otra_linea_negocio_1 · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0407_13" name="04.07 otra_linea_negocio_1 · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0407_14" name="04.07 otra_linea_negocio_1 · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0407_15" name="04.07 otra_linea_negocio_1 · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0407_16" name="04.07 otra_linea_negocio_1 · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0407_17" name="04.07 otra_linea_negocio_1 · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0407_18" name="04.07 otra_linea_negocio_1 · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0407_19" name="04.07 otra_linea_negocio_1 · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0407_20" name="04.07 otra_linea_negocio_1 · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0407_21" name="04.07 otra_linea_negocio_1 · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0407_22" name="04.07 otra_linea_negocio_1 · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0407_23" name="04.07 otra_linea_negocio_1 · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0407_24" name="04.07 otra_linea_negocio_1 · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0407_25" name="04.07 otra_linea_negocio_1 · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0407_26" name="04.07 otra_linea_negocio_1 · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0407_27" name="04.07 otra_linea_negocio_1 · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0407_28" name="04.07 otra_linea_negocio_1 · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+<details class="q f" data-req="0" data-type="f" data-item="Otra línea de negocio (2)"><summary class="ql"><span class="qc">04.08</span><span class="qt">Otra línea de negocio (2)</span><span class="tag">Completa</span><span class="fc">0/0</span></summary>
+<p class="og">Datos básicos</p><div class="gf">
+<label class="gfi wide">Nombre de la línea<input type="text" id="q0408_00" name="04.08 otra_linea_negocio_2 · nombre_linea"></label>
+<label class="gfi">Precio medio que paga realmente el cliente<input type="text" id="q0408_01" name="04.08 otra_linea_negocio_2 · precio_medio_paga_realmente_cliente"></label>
+<label class="gfi">Altas al mes (media de los últimos 6 meses)<input type="text" id="q0408_02" name="04.08 otra_linea_negocio_2 · altas_mes_media_ultimos_6_meses"></label>
+<label class="gfi">Clientes activos ahora<input type="text" id="q0408_03" name="04.08 otra_linea_negocio_2 · clientes_activos_ahora"></label>
+<label class="gfi">Duración y modalidad (online, presencial, híbrido)<input type="text" id="q0408_04" name="04.08 otra_linea_negocio_2 · duracion_modalidad_online_presencial_hibrido"></label>
+<label class="gfi">¿Se sigue vendiendo?<select id="q0408_05" name="04.08 otra_linea_negocio_2 · sigue_vendiendo"><option value="">Elige</option><option>Sí, es prioritario</option><option>Sí</option><option>Poco</option><option>Ya no se vende</option></select></label>
+</div><div class="deep" hidden>
+<p class="og">El programa</p><div class="gf">
+<label class="gfi wide">Qué consigue el cliente al terminar<textarea id="q0408_06" name="04.08 otra_linea_negocio_2 · consigue_cliente_terminar" rows="2"></textarea></label>
+<label class="gfi wide">A quién va dirigido<textarea id="q0408_07" name="04.08 otra_linea_negocio_2 · va_dirigido" rows="2"></textarea></label>
+<label class="gfi wide">Qué incluye (sesiones en grupo, videollamadas con entrenador y nutricionista, app, revisiones)<textarea id="q0408_08" name="04.08 otra_linea_negocio_2 · incluye_sesiones_grupo_videollamadas_entrenador_nutricionista" rows="2"></textarea></label>
+<label class="gfi wide">Seguimiento: frecuencia y canal (grupo, videollamada, WhatsApp, app)<textarea id="q0408_09" name="04.08 otra_linea_negocio_2 · seguimiento_frecuencia_canal_grupo_videollamada_whatsapp" rows="2"></textarea></label>
+<label class="gfi wide">Quién lo imparte (entrenador, nutricionista) y con qué titulación<textarea id="q0408_10" name="04.08 otra_linea_negocio_2 · imparte_entrenador_nutricionista_titulacion" rows="2"></textarea></label>
+<label class="gfi">Cuánto pierde de media un cliente en los 3 meses (dato real, si lo tienes)<input type="text" id="q0408_11" name="04.08 otra_linea_negocio_2 · cuanto_pierde_media_cliente_3_meses"></label>
+<label class="gfi wide">Valoración inicial y requisitos (lesiones, informe médico, nivel previo)<textarea id="q0408_12" name="04.08 otra_linea_negocio_2 · valoracion_inicial_requisitos_lesiones_informe_medico" rows="2"></textarea></label>
+<label class="gfi">App o plataforma que se usa<input type="text" id="q0408_13" name="04.08 otra_linea_negocio_2 · app_plataforma_usa"></label>
+<label class="gfi">Horarios o plazas disponibles<input type="text" id="q0408_14" name="04.08 otra_linea_negocio_2 · horarios_plazas_disponibles"></label>
+</div>
+<p class="og">Precio y resultados</p><div class="gf">
+<label class="gfi">Precio de lista<input type="text" id="q0408_15" name="04.08 otra_linea_negocio_2 · precio_lista"></label>
+<label class="gfi">Descuento máximo permitido<input type="text" id="q0408_16" name="04.08 otra_linea_negocio_2 · descuento_maximo_permitido"></label>
+<label class="gfi wide">Formas de pago y pago fraccionado (cuota mensual, número de cuotas)<textarea id="q0408_17" name="04.08 otra_linea_negocio_2 · formas_pago_pago_fraccionado_cuota_mensual" rows="2"></textarea></label>
+<label class="gfi">Garantía o devolución<input type="text" id="q0408_18" name="04.08 otra_linea_negocio_2 · garantia_devolucion"></label>
+<label class="gfi">Clientes totales desde que empezó<input type="text" id="q0408_19" name="04.08 otra_linea_negocio_2 · clientes_totales_desde_empezo"></label>
+<label class="gfi">Cuántos renuevan y cuántos abandonan<input type="text" id="q0408_20" name="04.08 otra_linea_negocio_2 · renuevan_abandonan"></label>
+</div>
+<p class="og">Cómo se vende</p><div class="gf">
+<label class="gfi wide">Perfil típico de quien lo compra (un ejemplo real, sin datos personales)<textarea id="q0408_21" name="04.08 otra_linea_negocio_2 · perfil_tipico_compra_ejemplo_real_sin" rows="2"></textarea></label>
+<label class="gfi wide">Por qué lo compran<textarea id="q0408_22" name="04.08 otra_linea_negocio_2 · compran" rows="2"></textarea></label>
+<label class="gfi wide">Objeciones propias de este programa y cómo las respondes<textarea id="q0408_23" name="04.08 otra_linea_negocio_2 · objeciones_propias_este_programa_respondes" rows="2"></textarea></label>
+<label class="gfi wide">Diferencia frente a gimnasios u otros entrenadores<textarea id="q0408_24" name="04.08 otra_linea_negocio_2 · diferencia_frente_gimnasios_u_otros_entrenadores" rows="2"></textarea></label>
+<label class="gfi wide">Resultados y testimonios citables (con permiso)<textarea id="q0408_25" name="04.08 otra_linea_negocio_2 · resultados_testimonios_citables_permiso" rows="2"></textarea></label>
+<label class="gfi wide">Qué no se debe prometer de este programa<textarea id="q0408_26" name="04.08 otra_linea_negocio_2 · no_debe_prometer_este_programa" rows="2"></textarea></label>
+<label class="gfi wide">Programa siguiente que se recomienda al terminar<textarea id="q0408_27" name="04.08 otra_linea_negocio_2 · programa_siguiente_recomienda_terminar" rows="2"></textarea></label>
+<label class="gfi wide">Materiales disponibles (vídeo, PDF, landing, enlace de pago)<textarea id="q0408_28" name="04.08 otra_linea_negocio_2 · materiales_disponibles_video_pdf_landing_enlace" rows="2"></textarea></label>
+</div>
+</div></details>
+</section>
+<section class="block" id="b05" data-b="5">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">05</span><div class="section-tag" data-n="05">Bloque</div><h2>Tu cliente ideal</h2><p class="bintro">Quién se apunta, con qué palabras te cuenta su situación y por qué se apunta o no. En la llamada nos dijiste que llega convencido de que bajar de peso es imposible y que tarda en decidirse: queremos entender bien ese proceso.</p></div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0501"><span class="qc">05.01</span><span class="qt">¿Quién te compra hoy? Edad, sexo, profesión, ubicación y si va al programa online o al presencial</span><span class="req">Imprescindible</span></label>
+<textarea id="q0501" name="05.01 compra_edad_sexo_profesion_ubicacion_si" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0502"><span class="qc">05.02</span><span class="qt">¿Cuáles son los motivos principales por los que llegan?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Bajar de peso, salud, una analítica, una lesión, autoestima, un evento, una recomendación…</p>
+<textarea id="q0502" name="05.02 son_motivos_principales_llegan" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0503"><span class="qc">05.03</span><span class="qt">¿Qué ha probado antes y por qué no le funcionó?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Dietas, gimnasio, apps, nutricionista…</p>
+<textarea id="q0503" name="05.03 ha_probado_antes_no_funciono" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0504"><span class="qc">05.04</span><span class="qt">¿Cómo le ayudas a romper la creencia de que «para mí es imposible bajar de peso»? ¿Qué le dices?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0504" name="05.04 ayudas_romper_creencia_imposible_bajar_peso" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0505"><span class="qc">05.05</span><span class="qt">¿Cuánto tiempo pasa desde que te escribe hasta que se apunta? ¿Qué le hace madurar la decisión?</span></label>
+<textarea id="q0505" name="05.05 cuanto_tiempo_pasa_desde_escribe_hasta" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0506"><span class="qc">05.06</span><span class="qt">Frases literales que te dicen cuando te cuentan su situación</span><span class="req">Imprescindible</span></label>
+<p class="qh">Con sus palabras, no con las tuyas. Cuantas más, mejor.</p>
+<textarea id="q0506" name="05.06 frases_literales_dicen_cuando_cuentan_situacion" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0507"><span class="qc">05.07</span><span class="qt">¿Qué le preguntas a alguien para saber si encaja?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0507" name="05.07 preguntas_alguien_saber_si_encaja" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0508"><span class="qc">05.08</span><span class="qt">¿A quién no debemos ofrecer nunca el programa?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0508" name="05.08 no_debemos_ofrecer_nunca_programa" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0509"><span class="qc">05.09</span><span class="qt">¿Quién más interviene en la decisión?</span></label>
+<p class="qh">Pareja, familia, su médico…</p>
+<textarea id="q0509" name="05.09 interviene_decision" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0510"><span class="qc">05.10</span><span class="qt">¿Cuándo hay que derivar a un médico antes de empezar? (patologías, medicación, trastornos de la conducta alimentaria…)</span><span class="req">Imprescindible</span></label>
+<textarea id="q0510" name="05.10 cuando_hay_derivar_medico_antes_empezar" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0511"><span class="qc">05.11</span><span class="qt">¿Cuáles son las 3 a 5 dudas o miedos más frecuentes antes de apuntarse?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0511" name="05.11 son_3_5_dudas_miedos_frecuentes" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0512"><span class="qc">05.12</span><span class="qt">¿Por qué no se apunta quien no se apunta?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0512" name="05.12 no_apunta_no_apunta" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0513"><span class="qc">05.13</span><span class="qt">¿Con quién te comparan y qué te diferencia?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Gimnasios low cost, otros entrenadores online, fisioterapeutas, apps de entrenamiento…</p>
+<textarea id="q0513" name="05.13 comparan_diferencia" rows="3" required></textarea>
+</div>
+</section>
+<section class="block" id="b06" data-b="6">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">06</span><div class="section-tag" data-n="06">Bloque</div><h2>Captación, campañas y herramientas</h2><p class="bintro">En la llamada nos contaste que estás con un rebranding y que preparas campañas locales y online con anuncios en vídeo, landing y un formulario de contacto rápido, sin obligar a agendar. Aquí lo concretamos.</p></div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0601"><span class="qc">06.01</span><span class="qt">¿Por qué canales llegan hoy y en qué proporción?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Instagram orgánico, el enlace de WhatsApp de la bio, Facebook, Google, recomendación, gente que pasa por el centro…</p>
+<textarea id="q0601" name="06.01 canales_llegan_proporcion" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0602"><span class="qc">06.02</span><span class="qt">Cuéntanos las campañas que vas a lanzar: canal, público, zona, fecha de arranque y quién las lleva</span><span class="req">Imprescindible</span></label>
+<textarea id="q0602" name="06.02 cuentanos_campanas_vas_lanzar_canal_publico" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0603"><span class="qc">06.03</span><span class="qt">¿En qué punto está el rebranding? ¿Cambia el nombre, los perfiles o el mensaje?</span></label>
+<p class="qh">Mencionaste un perfil personal y otro de marca.</p>
+<textarea id="q0603" name="06.03 punto_esta_rebranding_cambia_nombre_perfiles" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0604"><span class="qc">06.04</span><span class="qt">¿Qué pide el formulario de la landing y qué pasa justo después de que alguien lo rellena?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0604" name="06.04 pide_formulario_landing_pasa_justo_despues" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="r">
+<p class="ql"><span class="qc">06.05</span><span class="qt">Landings, dominio y CRM: ¿quién los monta?</span><span class="req">Imprescindible</span></p>
+<div class="opts" role="group">
+<label class="opt"><input type="radio" id="q0605_1" name="06.05 landings_dominio_crm_monta" value="Ya los tengo o los monta mi equipo"><span>Ya los tengo o los monta mi equipo</span></label>
+<label class="opt"><input type="radio" id="q0605_2" name="06.05 landings_dominio_crm_monta" value="Quiero que me lo propongáis vosotros"><span>Quiero que me lo propongáis vosotros</span></label>
+<label class="opt"><input type="radio" id="q0605_3" name="06.05 landings_dominio_crm_monta" value="Aún no lo sé"><span>Aún no lo sé</span></label>
+</div>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0606"><span class="qc">06.06</span><span class="qt">¿Qué herramientas usas ya? (web, dominio, CRM, WhatsApp Business, app de seguimiento, pasarela de pago)</span></label>
+<textarea id="q0606" name="06.06 herramientas_usas_ya_web_dominio_crm" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="s">
+<label class="ql" for="q0607"><span class="qc">06.07</span><span class="qt">¿El contacto da su consentimiento para que le escribamos o llamemos por WhatsApp, teléfono y email?</span><span class="req">Imprescindible</span></label>
+<select id="q0607" name="06.07 contacto_da_consentimiento_escribamos_llamemos_whatsapp" required><option value="">Elige una opción</option><option>Sí, por los tres canales</option><option>Solo por WhatsApp</option><option>Solo por teléfono</option><option>No lo sé</option></select>
+</div>
+<div class="q" data-req="1" data-type="r">
+<p class="ql"><span class="qc">06.08</span><span class="qt">Para tratar tus contactos cumpliendo el RGPD firmaríamos un contrato de encargado del tratamiento. ¿Tu política de privacidad lo contempla?</span><span class="req">Imprescindible</span></p>
+<div class="opts" role="group">
+<label class="opt"><input type="radio" id="q0608_1" name="06.08 tratar_contactos_cumpliendo_rgpd_firmariamos_contrato" value="Sí, lo contempla"><span>Sí, lo contempla</span></label>
+<label class="opt"><input type="radio" id="q0608_2" name="06.08 tratar_contactos_cumpliendo_rgpd_firmariamos_contrato" value="Habría que adaptarla"><span>Habría que adaptarla</span></label>
+<label class="opt"><input type="radio" id="q0608_3" name="06.08 tratar_contactos_cumpliendo_rgpd_firmariamos_contrato" value="No lo sé"><span>No lo sé</span></label>
+</div>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0609"><span class="qc">06.09</span><span class="qt">¿Cómo nos pasarías los contactos y cada cuánto?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Acceso al WhatsApp Business, a un CRM, una hoja de cálculo, aviso automático…</p>
+<textarea id="q0609" name="06.09 pasarias_contactos_cada_cuanto" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0610"><span class="qc">06.10</span><span class="qt">¿Cuántas personas de los últimos 6 meses te escribieron y no se apuntaron?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0610" name="06.10 personas_ultimos_6_meses_escribieron_no" required>
+</div>
+<div class="q" data-req="0" data-type="t">
+<label class="ql" for="q0611"><span class="qc">06.11</span><span class="qt">¿Cuántos antiguos clientes tienes? ¿Podemos ofrecerles otros programas?</span></label>
+<input type="text" id="q0611" name="06.11 antiguos_clientes_tienes_podemos_ofrecerles_otros">
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0612"><span class="qc">06.12</span><span class="qt">¿Haces retos, clases abiertas o eventos que generen contactos? Mencionaste la idea de un club o comunidad seleccionada: cuéntanos más</span></label>
+<textarea id="q0612" name="06.12 haces_retos_clases_abiertas_eventos_generen" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0613"><span class="qc">06.13</span><span class="qt">¿En qué días y horarios responde mejor tu público?</span></label>
+<textarea id="q0613" name="06.13 dias_horarios_responde_mejor_publico" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b07" data-b="7">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">07</span><div class="section-tag" data-n="07">Bloque</div><h2>Tu proceso de venta hoy</h2><p class="bintro">Cómo funciona ahora, para mejorar sobre lo que ya funciona.</p></div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0701"><span class="qc">07.01</span><span class="qt">¿Quién atiende hoy el WhatsApp y cuántas conversaciones lleva a la semana?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Lo preguntamos para coordinarnos con esa persona, no para sustituirla.</p>
+<textarea id="q0701" name="07.01 atiende_whatsapp_conversaciones_lleva_semana" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="s">
+<label class="ql" for="q0702"><span class="qc">07.02</span><span class="qt">¿Cuánto tardas de media en responder a un contacto nuevo?</span></label>
+<select id="q0702" name="07.02 cuanto_tardas_media_responder_contacto_nuevo"><option value="">Elige una opción</option><option>Menos de 1 hora</option><option>El mismo día</option><option>1–2 días</option><option>Más de 2 días</option></select>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0703"><span class="qc">07.03</span><span class="qt">De cada 10 personas que escriben, ¿cuántas hacen una llamada o valoración y cuántas se apuntan?</span><span class="req">Imprescindible</span></label>
+<input type="text" id="q0703" name="07.03 cada_10_personas_escriben_hacen_llamada" required>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0704"><span class="qc">07.04</span><span class="qt">Pasos desde que alguien escribe hasta que paga, en el canal online y en el local</span><span class="req">Imprescindible</span></label>
+<textarea id="q0704" name="07.04 pasos_desde_alguien_escribe_hasta_paga" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0705"><span class="qc">07.05</span><span class="qt">¿Cómo es hoy la cita presencial en el centro y la llamada online? Duración, quién la hace, qué se enseña y si es gratuita</span><span class="req">Imprescindible</span></label>
+<textarea id="q0705" name="07.05 cita_presencial_centro_llamada_online_duracion" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="s">
+<label class="ql" for="q0706"><span class="qc">07.06</span><span class="qt">¿Tienes mensajes tipo de WhatsApp o un guion de llamada?</span></label>
+<select id="q0706" name="07.06 tienes_mensajes_tipo_whatsapp_guion_llamada"><option value="">Elige una opción</option><option>Sí, te los envío</option><option>Parcialmente</option><option>No</option></select>
+</div>
+<div class="q" data-req="0" data-type="s">
+<label class="ql" for="q0707"><span class="qc">07.07</span><span class="qt">¿Podrías enviarnos capturas de 2 o 3 conversaciones reales, anonimizadas?</span></label>
+<select id="q0707" name="07.07 podrias_enviarnos_capturas_2_3_conversaciones"><option value="">Elige una opción</option><option>Sí, te las envío</option><option>Prefiero contártelo en una llamada</option><option>No es posible</option></select>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0708"><span class="qc">07.08</span><span class="qt">¿Qué seguimiento haces a quien no se apunta y en qué días?</span></label>
+<textarea id="q0708" name="07.08 seguimiento_haces_no_apunta_dias" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="t">
+<label class="ql" for="q0709"><span class="qc">07.09</span><span class="qt">¿Dónde apuntas hoy los contactos y su estado? ¿Podríamos tener acceso?</span><span class="req">Imprescindible</span></label>
+<p class="qh">CRM, WhatsApp Business con etiquetas, una hoja de cálculo…</p>
+<input type="text" id="q0709" name="07.09 donde_apuntas_contactos_estado_podriamos_tener" required>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0710"><span class="qc">07.10</span><span class="qt">¿Has trabajado antes con closers, setters o comerciales a comisión? ¿Qué funcionó y qué no?</span></label>
+<textarea id="q0710" name="07.10 has_trabajado_antes_closers_setters_comerciales" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0711"><span class="qc">07.11</span><span class="qt">¿Cómo debe presentarse el equipo de cierre?</span><span class="req">Imprescindible</span></label>
+<p class="qh">En nombre de Wild Box, como equipo de atención, con un número propio o con el tuyo…</p>
+<textarea id="q0711" name="07.11 debe_presentarse_equipo_cierre" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0712"><span class="qc">07.12</span><span class="qt">¿En qué casos debe pasarte la conversación a ti o a un profesional del equipo?</span></label>
+<p class="qh">Lesiones complejas, patologías, dudas médicas, casos especiales…</p>
+<textarea id="q0712" name="07.12 casos_debe_pasarte_conversacion_ti_profesional" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b08" data-b="8">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">08</span><div class="section-tag" data-n="08">Bloque</div><h2>Mensaje, objeciones y límites</h2><p class="bintro">Lo que se dice, cómo se responde y lo que no se promete nunca.</p></div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0801"><span class="qc">08.01</span><span class="qt">Cuéntanos la historia de Wild Box como se la contarías a un cliente: por qué nació, quién está detrás y qué la hace distinta</span><span class="req">Imprescindible</span></label>
+<textarea id="q0801" name="08.01 cuentanos_historia_wild_box_contarias_cliente" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0802"><span class="qc">08.02</span><span class="qt">En una frase: ¿por qué alguien debería entrenar con Wild Box y no en otro sitio?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0802" name="08.02 frase_alguien_deberia_entrenar_wild_box" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0803"><span class="qc">08.03</span><span class="qt">¿Qué motivos reales hay para empezar ahora y no dentro de unos meses?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Plazas limitadas, inicio de grupo o de reto, precio de lanzamiento… Solo motivos verdaderos.</p>
+<textarea id="q0803" name="08.03 motivos_reales_hay_empezar_ahora_no" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0804"><span class="qc">08.04</span><span class="qt">Tu mejor respuesta, palabra por palabra, cuando te dicen «es caro» o «ahora no me lo puedo permitir»</span></label>
+<p class="qh">Aunque sea aproximada.</p>
+<textarea id="q0804" name="08.04 mejor_respuesta_palabra_palabra_cuando_dicen" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0805"><span class="qc">08.05</span><span class="qt">Tu mejor respuesta cuando te dicen «no tengo tiempo»</span></label>
+<p class="qh">Aunque sea aproximada.</p>
+<textarea id="q0805" name="08.05 mejor_respuesta_cuando_dicen_no_tengo" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0806"><span class="qc">08.06</span><span class="qt">Tu mejor respuesta cuando te dicen «lo tengo que pensar» o «lo tengo que hablar con mi pareja»</span></label>
+<p class="qh">Aunque sea aproximada.</p>
+<textarea id="q0806" name="08.06 mejor_respuesta_cuando_dicen_tengo_pensar" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0807"><span class="qc">08.07</span><span class="qt">Tu mejor respuesta cuando te dicen «ya he probado mil dietas y no me funciona nada»</span></label>
+<p class="qh">Aunque sea aproximada.</p>
+<textarea id="q0807" name="08.07 mejor_respuesta_cuando_dicen_ya_he" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0808"><span class="qc">08.08</span><span class="qt">Tu mejor respuesta cuando te preguntan «¿el online funciona igual que el presencial?»</span></label>
+<p class="qh">Aunque sea aproximada.</p>
+<textarea id="q0808" name="08.08 mejor_respuesta_cuando_preguntan_online_funciona" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0809"><span class="qc">08.09</span><span class="qt">Tu mejor respuesta cuando te preguntan «¿cuántos kilos voy a perder?»</span></label>
+<p class="qh">Aunque sea aproximada.</p>
+<textarea id="q0809" name="08.09 mejor_respuesta_cuando_preguntan_kilos_voy" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0810"><span class="qc">08.10</span><span class="qt">Otras objeciones y preguntas frecuentes, y cómo las respondes</span></label>
+<textarea id="q0810" name="08.10 otras_objeciones_preguntas_frecuentes_respondes" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0811"><span class="qc">08.11</span><span class="qt">¿Qué no se puede prometer nunca en una conversación?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Kilos concretos en un plazo, resultados garantizados, efectos sobre enfermedades…</p>
+<textarea id="q0811" name="08.11 no_puede_prometer_nunca_conversacion" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0812"><span class="qc">08.12</span><span class="qt">¿Hay palabras o expresiones que no quieres que usemos?</span></label>
+<textarea id="q0812" name="08.12 hay_palabras_expresiones_no_quieres_usemos" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b09" data-b="9">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">09</span><div class="section-tag" data-n="09">Bloque</div><h2>Pagos y pago fraccionado</h2><p class="bintro">En la llamada vimos que muchas ventas se pierden en el momento del pago, y que el pago fraccionado (con una financiera tipo seQura, que cobra al cliente a plazos y te paga a ti al momento) puede marcar la diferencia. Aquí lo concretamos.</p></div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0901"><span class="qc">09.01</span><span class="qt">Formas de pago de cada programa hoy</span><span class="req">Imprescindible</span></label>
+<p class="qh">Bizum, tarjeta, transferencia, domiciliación, Stripe, Hotmart…</p>
+<textarea id="q0901" name="09.01 formas_pago_cada_programa" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0902"><span class="qc">09.02</span><span class="qt">Enlaces de pago o pasarela por programa</span><span class="req">Imprescindible</span></label>
+<textarea id="q0902" name="09.02 enlaces_pago_pasarela_programa" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="r">
+<p class="ql"><span class="qc">09.03</span><span class="qt">¿Ofreces hoy pago fraccionado?</span><span class="req">Imprescindible</span></p>
+<div class="opts" role="group">
+<label class="opt"><input type="radio" id="q0903_1" name="09.03 ofreces_pago_fraccionado" value="Sí, con una financiera"><span>Sí, con una financiera</span></label>
+<label class="opt"><input type="radio" id="q0903_2" name="09.03 ofreces_pago_fraccionado" value="Sí, lo gestiono yo (cuotas propias)"><span>Sí, lo gestiono yo (cuotas propias)</span></label>
+<label class="opt"><input type="radio" id="q0903_3" name="09.03 ofreces_pago_fraccionado" value="No, pero me interesa"><span>No, pero me interesa</span></label>
+<label class="opt"><input type="radio" id="q0903_4" name="09.03 ofreces_pago_fraccionado" value="No, y no lo quiero"><span>No, y no lo quiero</span></label>
+</div>
+</div>
+<div class="q" data-req="0" data-type="t">
+<label class="ql" for="q0904"><span class="qc">09.04</span><span class="qt">Si lo ofreces, ¿con qué entidad, en cuántas cuotas y de cuánto queda la cuota mensual?</span></label>
+<p class="qh">En la llamada se habló de unos 165 € al mes. Confírmalo.</p>
+<input type="text" id="q0904" name="09.04 si_ofreces_entidad_cuotas_cuanto_queda">
+</div>
+<div class="q" data-req="0" data-type="t">
+<label class="ql" for="q0905"><span class="qc">09.05</span><span class="qt">¿Cuántas ventas crees que pierdes al mes por el precio o por no poder pagarlo de golpe?</span></label>
+<input type="text" id="q0905" name="09.05 ventas_crees_pierdes_mes_precio_no">
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0906"><span class="qc">09.06</span><span class="qt">¿Qué garantía o política de devolución tiene el cliente?</span><span class="req">Imprescindible</span></label>
+<textarea id="q0906" name="09.06 garantia_politica_devolucion_tiene_cliente" rows="3" required></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0907"><span class="qc">09.07</span><span class="qt">Pasos desde el pago hasta el primer entrenamiento</span><span class="req">Imprescindible</span></label>
+<textarea id="q0907" name="09.07 pasos_desde_pago_hasta_primer_entrenamiento" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q0908"><span class="qc">09.08</span><span class="qt">¿Quién factura y qué IVA aplicas?</span></label>
+<textarea id="q0908" name="09.08 factura_iva_aplicas" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q0909"><span class="qc">09.09</span><span class="qt">¿En qué momento consideras cerrada una venta?</span><span class="req">Imprescindible</span></label>
+<p class="qh">Primer pago, pago completo, primera sesión…</p>
+<textarea id="q0909" name="09.09 momento_consideras_cerrada_venta" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="t">
+<label class="ql" for="q0910"><span class="qc">09.10</span><span class="qt">¿Qué porcentaje aproximado de clientes abandona antes de terminar o pide devolución?</span></label>
+<input type="text" id="q0910" name="09.10 porcentaje_aproximado_clientes_abandona_antes_terminar">
+</div>
+</section>
+<section class="block" id="b10" data-b="10">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">10</span><div class="section-tag" data-n="10">Bloque</div><h2>Prueba social y reputación</h2><p class="bintro">Lo que el equipo puede enseñar y citar, y lo que dicen de ti.</p></div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q1001"><span class="qc">10.01</span><span class="qt">Casos y testimonios que podemos citar con nombre: persona, resultado y permiso</span><span class="req">Imprescindible</span></label>
+<p class="qh">En tu Instagram aparecen casos como el de Ismail y fotos de antes y después del #RetoWildBox. ¿Podemos mencionarlos en las conversaciones?</p>
+<textarea id="q1001" name="10.01 casos_testimonios_podemos_citar_nombre_persona" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1002"><span class="qc">10.02</span><span class="qt">¿Qué vídeos de testimonios o de cambios tienes disponibles?</span></label>
+<textarea id="q1002" name="10.02 videos_testimonios_cambios_tienes_disponibles" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1003"><span class="qc">10.03</span><span class="qt">¿Dónde tienes reseñas públicas?</span></label>
+<p class="qh">Google, Facebook…</p>
+<textarea id="q1003" name="10.03 donde_tienes_resenas_publicas" rows="3"></textarea>
+</div>
+<div class="q" data-req="1" data-type="a">
+<label class="ql" for="q1004"><span class="qc">10.04</span><span class="qt">Titulaciones y formación del equipo que podamos citar</span><span class="req">Imprescindible</span></label>
+<p class="qh">Ciencias del deporte, readaptación, fisioterapia, nutrición…</p>
+<textarea id="q1004" name="10.04 titulaciones_formacion_equipo_podamos_citar" rows="3" required></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1005"><span class="qc">10.05</span><span class="qt">Prensa, colaboraciones o profesionales que te derivan clientes</span></label>
+<textarea id="q1005" name="10.05 prensa_colaboraciones_profesionales_derivan_clientes" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b11" data-b="11">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">11</span><div class="section-tag" data-n="11">Bloque</div><h2>Cómo trabajaríamos juntos</h2><p class="bintro">Para encajar el equipo con tu forma de trabajar.</p></div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1101"><span class="qc">11.01</span><span class="qt">¿Buscas exclusividad en algún canal o programa?</span></label>
+<textarea id="q1101" name="11.01 buscas_exclusividad_algun_canal_programa" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1102"><span class="qc">11.02</span><span class="qt">¿Qué informes de seguimiento esperas y con qué frecuencia?</span></label>
+<textarea id="q1102" name="11.02 informes_seguimiento_esperas_frecuencia" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1103"><span class="qc">11.03</span><span class="qt">Reuniones de seguimiento: frecuencia y quién asistiría por tu parte</span></label>
+<textarea id="q1103" name="11.03 reuniones_seguimiento_frecuencia_asistiria_parte" rows="3"></textarea>
+</div>
+<div class="q" data-req="0" data-type="t">
+<label class="ql" for="q1104"><span class="qc">11.04</span><span class="qt">¿Cuándo te gustaría empezar?</span></label>
+<input type="text" id="q1104" name="11.04 cuando_gustaria_empezar">
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1105"><span class="qc">11.05</span><span class="qt">¿Hay algo más que debamos saber?</span></label>
+<textarea id="q1105" name="11.05 hay_algo_debamos_saber" rows="3"></textarea>
+</div>
+</section>
+<section class="block" id="b12" data-b="12">
+<div class="seal-divider" aria-hidden="true"><span class="line"></span><svg viewBox="0 0 100 100" fill="none"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#8E763A" stroke-width="4" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#8E763A" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="line right"></span></div>
+<div class="bhead"><span class="bnum">12</span><div class="section-tag" data-n="12">Bloque</div><h2>Documentos y accesos</h2><p class="bintro">Marca lo que puedes enviarnos. Con esto preparamos los materiales del equipo.</p></div>
+<div class="q" data-req="0" data-type="c">
+<p class="ql"><span class="qc">12.01</span><span class="qt">Documentos que puedes enviarnos</span></p>
+<div class="opts" role="group">
+<label class="opt"><input type="checkbox" id="q1201_1" name="12.01 documentos_puedes_enviarnos[]" value="Tarifas y condiciones"><span>Tarifas y condiciones</span></label>
+<label class="opt"><input type="checkbox" id="q1201_2" name="12.01 documentos_puedes_enviarnos[]" value="Descripción de cada programa"><span>Descripción de cada programa</span></label>
+<label class="opt"><input type="checkbox" id="q1201_3" name="12.01 documentos_puedes_enviarnos[]" value="Enlaces de pago"><span>Enlaces de pago</span></label>
+<label class="opt"><input type="checkbox" id="q1201_4" name="12.01 documentos_puedes_enviarnos[]" value="Mensajes tipo de WhatsApp"><span>Mensajes tipo de WhatsApp</span></label>
+<label class="opt"><input type="checkbox" id="q1201_5" name="12.01 documentos_puedes_enviarnos[]" value="Capturas de conversaciones anonimizadas"><span>Capturas de conversaciones anonimizadas</span></label>
+<label class="opt"><input type="checkbox" id="q1201_6" name="12.01 documentos_puedes_enviarnos[]" value="Objeciones y preguntas frecuentes"><span>Objeciones y preguntas frecuentes</span></label>
+<label class="opt"><input type="checkbox" id="q1201_7" name="12.01 documentos_puedes_enviarnos[]" value="Testimonios autorizados (texto, foto o vídeo)"><span>Testimonios autorizados (texto, foto o vídeo)</span></label>
+<label class="opt"><input type="checkbox" id="q1201_8" name="12.01 documentos_puedes_enviarnos[]" value="Fotos de antes y después con permiso"><span>Fotos de antes y después con permiso</span></label>
+<label class="opt"><input type="checkbox" id="q1201_9" name="12.01 documentos_puedes_enviarnos[]" value="Base de contactos que no se apuntaron"><span>Base de contactos que no se apuntaron</span></label>
+<label class="opt"><input type="checkbox" id="q1201_10" name="12.01 documentos_puedes_enviarnos[]" value="Acceso al WhatsApp Business o al CRM"><span>Acceso al WhatsApp Business o al CRM</span></label>
+<label class="opt"><input type="checkbox" id="q1201_11" name="12.01 documentos_puedes_enviarnos[]" value="Acceso a la app o plataforma de entrenamiento"><span>Acceso a la app o plataforma de entrenamiento</span></label>
+<label class="opt"><input type="checkbox" id="q1201_12" name="12.01 documentos_puedes_enviarnos[]" value="Titulaciones del equipo"><span>Titulaciones del equipo</span></label>
+</div>
+</div>
+<div class="q" data-req="0" data-type="a">
+<label class="ql" for="q1202"><span class="qc">12.02</span><span class="qt">¿Cómo y cuándo nos los harás llegar?</span></label>
+<p class="qh">Carpeta compartida, WhatsApp, email…</p>
+<textarea id="q1202" name="12.02 cuando_haras_llegar" rows="3"></textarea>
+</div>
+</section>
+
+<div class="send" id="send">
+  <div class="section-tag">Último paso</div>
+  <h2>Enviar el cuestionario</h2>
+  <p>Al terminar, generamos un PDF con todas las preguntas y tus respuestas para que nos lo envíes por WhatsApp o por email. Con él preparamos nuestra propuesta de colaboración. Si falta alguna pregunta imprescindible, te lo indicamos aquí abajo.</p>
+  <div class="row"><button type="submit" class="btn" id="go">Terminar y generar el PDF</button></div>
+  <p class="msg" id="msg"></p>
+  <div class="result" id="result" hidden>
+    <p id="rtitle"><strong>Cuestionario completado.</strong> Hemos preparado un PDF con todas las preguntas y tus respuestas. Descárgalo y envíanoslo por WhatsApp o por email.</p>
+    <p class="msg ok" id="netmsg" hidden></p>
+    <div class="row">
+      <button type="button" class="btn" id="pdf">Descargar el PDF</button>
+      <button type="button" class="btn ghost" id="share" hidden>Compartir el PDF</button>
+    </div>
+    <p class="msg" id="pmsg"></p>
+    <div class="dest">
+      <div class="destc">
+        <span class="dl">WhatsApp</span>
+        <span class="dv">+34 663 347 696</span>
+        <a class="btn ghost sm" id="wa" href="https://wa.me/34663347696" target="_blank" rel="noopener">Abrir WhatsApp</a>
+      </div>
+      <div class="destc">
+        <span class="dl">Email</span>
+        <span class="dv">david@closersearch.com</span>
+        <a class="btn ghost sm" id="mail" href="mailto:david@closersearch.com" target="_blank" rel="noopener">Abrir el correo</a>
+      </div>
+    </div>
+    <p class="msg">Al abrir WhatsApp o el correo, adjunta el PDF que acabas de descargar. Si los botones no se abren, escríbenos directamente al número o al email de arriba.</p>
+    <details class="txt"><summary>Ver las respuestas en texto</summary>
+      <textarea id="out" readonly aria-label="Respuestas en texto"></textarea>
+      <div class="row"><button type="button" class="btn ghost sm" id="copy">Copiar el texto</button></div>
+      <p class="msg" id="cmsg"></p>
+    </details>
+  </div>
+</div>
+</form>
+</div>
+</main>
+
+<footer class="site-footer">
+  <div class="ft-grid">
+    <div class="ft-brand"><a class="logo" href="#top"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="logo-text"><span class="brand-name">CLOSER<span class="search"> SEARCH</span></span><span class="logo-sub">Selección de talento de cierre</span></span></a><p>Tu departamento comercial, llave en mano. Seleccionamos, formamos y dirigimos equipos de cierre para empresas de formación y productos digitales.</p></div>
+    <div><h5>Contacto</h5><span>david@closersearch.com</span><span>+34 663 347 696</span><a href="https://www.closersearch.com" target="_blank" rel="noopener">www.closersearch.com</a></div>
+    <div><h5>Firma</h5><span class="ft-sign">David Martínez-Bayer</span><span>CEO y Fundador de Closer Search</span></div>
+  </div>
+  <div class="ft-bottom">Closer Search · Documento confidencial. La información que nos facilites se usará solo para preparar la colaboración con Wild Box.</div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  var KEY='cs-cuest-wildbox-v1', f=document.getElementById('f');
+  var qs=[].slice.call(document.querySelectorAll('.q'));
+  function store(){try{return window.localStorage}catch(e){return null}}
+  function answered(q){
+    var t=q.dataset.type;
+    if(t==='r'||t==='c') return !!q.querySelector('input:checked');
+    if(t==='f'){
+      var all=[].filter.call(q.querySelectorAll('input,select,textarea'),function(x){return !x.closest('.deep[hidden]')}), k=0;
+      [].forEach.call(all,function(x){if(x.value.trim())k++});
+      var c=q.querySelector('.fc'); c.textContent=k+'/'+all.length; c.classList.toggle('full',k===all.length);
+      return k>=Math.ceil(all.length/2);
+    }
+    var el=q.querySelector('input,textarea,select'); return !!(el&&el.value.trim());
+  }
+  function sync(){
+    var chosen={}; [].forEach.call(document.querySelectorAll('[data-select] input:checked'),function(i){chosen[i.value]=1});
+    [].forEach.call(document.querySelectorAll('details.f'),function(d){
+      var on=!!chosen[d.dataset.item]; d.querySelector('.deep').hidden=!on; d.classList.toggle('full-f',on);
+    });
+  }
+  function progress(){
+    sync();
+    var n=0; qs.forEach(function(q){ if(answered(q)){n++; q.classList.remove('missing');} });
+    var p=Math.round(n/qs.length*100);
+    document.getElementById('fill').style.width=p+'%';
+    document.getElementById('pct').textContent=p+' %';
+    [].slice.call(document.querySelectorAll('.block')).forEach(function(b){
+      var bq=b.querySelectorAll('.q'), k=0; [].forEach.call(bq,function(q){if(answered(q))k++});
+      var nb=document.querySelector('.navb[data-b="'+b.dataset.b+'"]');
+      document.getElementById('np'+b.dataset.b).textContent=k+'/'+bq.length;
+      nb.classList.toggle('done',k===bq.length);
+    });
+  }
+  function collect(){
+    var d={}; [].forEach.call(f.elements,function(el){
+      if(!el.name||el.name==='form-name'||el.name==='bot-field'||el.type==='file') return;
+      if(el.type==='radio'||el.type==='checkbox'){ if(!el.checked) return; (d[el.name]=d[el.name]||[]).push(el.value); }
+      else d[el.name]=el.value;
+    }); return d;
+  }
+  function save(){
+    var s=store(); if(!s) return;
+    try{ s.setItem(KEY,JSON.stringify(collect()));
+      document.getElementById('saved').textContent='Guardado '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}); }catch(e){}
+  }
+  function load(){
+    var s=store(); if(!s) return; var d;
+    try{ d=JSON.parse(s.getItem(KEY)||'null'); }catch(e){ d=null; }
+    if(!d) return;
+    [].forEach.call(f.elements,function(el){
+      if(!(el.name in d)||el.type==='file') return; var v=d[el.name];
+      if(el.type==='radio'||el.type==='checkbox') el.checked=Array.isArray(v)&&v.indexOf(el.value)>-1;
+      else el.value=v;
+    });
+    document.getElementById('saved').textContent='Respuestas recuperadas';
+  }
+  var t; f.addEventListener('input',function(){ progress(); clearTimeout(t); t=setTimeout(save,400); });
+  f.addEventListener('change',function(){ progress(); save(); });
+
+  function model(){
+    var blocks=[];
+    [].slice.call(document.querySelectorAll('.block')).forEach(function(b){
+      var items=[];
+      [].forEach.call(b.querySelectorAll('.q'),function(q){
+        var t=q.dataset.type, it={code:q.querySelector('.qc').textContent, label:q.querySelector('.qt').textContent, req:q.dataset.req==='1'};
+        if(t==='f'){
+          it.ficha=true; it.full=q.classList.contains('full-f');
+          it.fields=[].filter.call(q.querySelectorAll('.gfi'),function(l){return !l.closest('.deep[hidden]')}).map(function(l){
+            var x=l.querySelector('input,select,textarea'); return {label:l.firstChild.textContent.trim(), value:x.value.trim()};
+          });
+        } else if(t==='r'||t==='c'){
+          it.value=[].map.call(q.querySelectorAll('input:checked'),function(i){return i.value}).join(t==='c'?'\n':', ');
+        } else it.value=q.querySelector('input,textarea,select').value.trim();
+        items.push(it);
+      });
+      blocks.push({num:b.querySelector('.bnum').textContent, title:b.querySelector('h2').textContent, items:items});
+    });
+    return blocks;
+  }
+  function val(id){var el=document.getElementById(id);return el?el.value.trim():''}
+  function text(){
+    var lines=['CUESTIONARIO DE COLABORACIÓN · Wild Box',''];
+    model().forEach(function(b){
+      lines.push('== '+b.num+' · '+b.title+' ==');
+      b.items.forEach(function(it){
+        lines.push(it.code+' '+it.label);
+        if(it.ficha) it.fields.forEach(function(fd){lines.push('   - '+fd.label+': '+(fd.value||'—'))});
+        else lines.push('→ '+(it.value?it.value.replace(/\n/g,', '):'(sin respuesta)'));
+        lines.push('');
+      });
+    });
+    return lines.join('\n');
+  }
+  function today(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+  var FILENAME='Wild-Box-cuestionario-colaboracion-'+today()+'.pdf';
+
+  function buildPDF(){
+    var J=window.jspdf&&window.jspdf.jsPDF; if(!J) return null;
+    var doc=new J({unit:'mm',format:'a4'}), W=210, H=297, M=18, CW=W-2*M, y=0;
+    var GOLD=[160,128,52], INK=[25,23,20], MUTED=[110,104,92];
+    function clean(t){return String(t).replace(/[→]/g,'->').replace(/[–—]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/[…]/g,'...')}
+    function need(h){ if(y+h>H-18){ doc.addPage(); y=20; } }
+    function para(t,size,style,color,indent,gap){
+      indent=indent||0; doc.setFont('helvetica',style||'normal'); doc.setFontSize(size); doc.setTextColor.apply(doc,color||INK);
+      var lh=size*0.42, lines=doc.splitTextToSize(clean(t),CW-indent);
+      lines.forEach(function(l){ need(lh); doc.text(l,M+indent,y+lh*0.8); y+=lh; });
+      y+=(gap==null?1.5:gap);
+    }
+    doc.setFillColor(7,7,7); doc.rect(0,0,W,46,'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(239,233,220); doc.text('CLOSER',M,16);
+    doc.setTextColor(201,168,76); doc.text('SEARCH',M+17.5,16);
+    doc.setFontSize(20); doc.setTextColor(239,233,220); doc.text('Cuestionario de colaboración',M,30);
+    doc.setFontSize(13); doc.setTextColor(201,168,76); doc.text('Wild Box · Entrenamiento y Readaptación de lesiones',M,38);
+    y=56;
+    var all=qs.filter(function(q){return q.dataset.type!=='f'}), done=all.filter(answered).length;
+    var req=qs.filter(function(q){return q.dataset.req==='1'}), reqd=req.filter(answered).length;
+    var sel=[].map.call(document.querySelectorAll('[data-select] input:checked'),function(i){return i.value});
+    para('Fecha: '+new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'}),10,'normal',MUTED,0,0.5);
+    if(val('q0101')) para('Rellenado por: '+val('q0101'),10,'normal',MUTED,0,0.5);
+    if(val('q0102')) para('Contacto: '+val('q0102'),10,'normal',MUTED,0,0.5);
+    para('Preguntas respondidas: '+done+' de '+all.length+' · Imprescindibles: '+reqd+' de '+req.length,10,'normal',MUTED,0,4);
+    if(sel.length){ para('Programas y líneas elegidos para la colaboración',11,'bold',GOLD,0,1); sel.forEach(function(x){para('·  '+x,10,'normal',INK,3,0.3)}); y+=4; }
+    model().forEach(function(b){
+      need(18); y+=3;
+      doc.setDrawColor.apply(doc,GOLD); doc.setLineWidth(0.6); doc.line(M,y,M+CW,y); y+=6;
+      para(b.num+'  ·  '+b.title,13,'bold',INK,0,3);
+      b.items.forEach(function(it){
+        need(12);
+        if(it.ficha){
+          para(it.code+'  '+it.label+(it.full?'   [Ficha completa]':''),10.5,'bold',it.full?GOLD:INK,0,1);
+          it.fields.forEach(function(fd){ para(fd.label+': '+(fd.value||'—'),9.3,'normal',fd.value?INK:MUTED,4,0.6); });
+          y+=2.5;
+        } else {
+          para(it.code+'  '+it.label+(it.req?'  *':''),10.5,'bold',INK,0,1);
+          if(it.value) it.value.split('\n').forEach(function(p){ para(p,10,'normal',INK,4,0.4); });
+          else para('Sin respuesta',10,'italic',MUTED,4,0.4);
+          y+=2.5;
+        }
+      });
+    });
+    var n=doc.getNumberOfPages();
+    for(var i=1;i<=n;i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor.apply(doc,MUTED);
+      doc.text('Closer Search · Documento confidencial · www.closersearch.com',M,H-9);
+      doc.text('Página '+i+' de '+n,W-M,H-9,{align:'right'});
+      if(i===1){ doc.text('* Pregunta imprescindible',W-M,52,{align:'right'}); } }
+    return doc.output('blob');
+  }
+
+  var pdfBlob=null;
+  function getPDF(){ if(!pdfBlob) pdfBlob=buildPDF(); return pdfBlob; }
+  var pmsg=document.getElementById('pmsg');
+  document.getElementById('pdf').addEventListener('click',function(){
+    var blob=getPDF();
+    if(!blob){ pmsg.className='msg err'; pmsg.textContent='No se ha podido generar el PDF. Recarga la página e inténtalo de nuevo; tus respuestas siguen guardadas.'; return; }
+    pmsg.className='msg'; pmsg.textContent='';
+    var a=document.createElement('a'), u=URL.createObjectURL(blob);
+    a.href=u; a.download=FILENAME; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(u)},4000);
+    pmsg.className='msg ok'; pmsg.textContent='PDF descargado. Ahora adjúntalo en WhatsApp o en el correo.';
+  });
+  var shareBtn=document.getElementById('share');
+  shareBtn.addEventListener('click',function(){
+    var blob=getPDF(); if(!blob) return;
+    var file=new File([blob],FILENAME,{type:'application/pdf'});
+    navigator.share({files:[file],title:'Cuestionario de colaboración Wild Box',text:'Respuestas de Wild Box al cuestionario de colaboración de Closer Search.'})
+      .then(function(){ pmsg.className='msg ok'; pmsg.textContent='PDF compartido.'; })
+      .catch(function(e){ if(e&&e.name==='AbortError') return; shareBtn.hidden=true; pmsg.className='msg'; pmsg.textContent='Este dispositivo no permite compartir el archivo directamente. Descárgalo y adjúntalo.'; });
+  });
+
+  var hosted=/closersearch\.com$|netlify\.app$/.test(location.hostname);
+  function sendNetlify(){
+    var blob=getPDF(), fd=new FormData(f);
+    if(blob) fd.set('pdf-respuestas', new File([blob],FILENAME,{type:'application/pdf'}));
+    return fetch('/',{method:'POST',body:fd});
+  }
+  f.addEventListener('submit',function(ev){
+    ev.preventDefault();
+    var miss=qs.filter(function(q){return q.dataset.req==='1'&&!answered(q)});
+    var msg=document.getElementById('msg');
+    qs.forEach(function(q){q.classList.remove('missing')});
+    if(miss.length){
+      miss.forEach(function(q){q.classList.add('missing')});
+      msg.className='msg err';
+      msg.textContent='Faltan '+miss.length+' preguntas imprescindibles, marcadas en rojo. La primera es la '+miss[0].querySelector('.qc').textContent+'.';
+      miss[0].scrollIntoView({behavior:'smooth',block:'center'});
+      var el=miss[0].querySelector('input,textarea,select'); if(el) setTimeout(function(){el.focus({preventScroll:true})},400);
+      return;
+    }
+    save(); msg.className='msg'; msg.textContent='';
+    pdfBlob=null;
+    document.getElementById('out').value=text();
+    var who=val('q0101');
+    document.getElementById('wa').href='https://wa.me/34663347696?text='+encodeURIComponent('Hola David, soy '+(who||'[nombre]')+', de Wild Box. Te envío el PDF con mis respuestas al cuestionario de colaboración.');
+    document.getElementById('mail').href='mailto:david@closersearch.com?subject='+encodeURIComponent('Wild Box · Respuestas al cuestionario de colaboración')+'&body='+encodeURIComponent('Hola David,\n\nTe adjunto el PDF con las respuestas de Wild Box al cuestionario de colaboración.\n\nUn saludo,\n'+(who||''));
+    try{ var probe=new File([new Blob(['x'])],'a.pdf',{type:'application/pdf'}); shareBtn.hidden=!(navigator.canShare&&navigator.canShare({files:[probe]})); }catch(e){ shareBtn.hidden=true; }
+    var r=document.getElementById('result'); r.hidden=false;
+    r.scrollIntoView({behavior:'smooth',block:'start'});
+    if(hosted){
+      var nm=document.getElementById('netmsg');
+      sendNetlify().then(function(res){ if(!res.ok) throw 0; nm.hidden=false; nm.textContent='Hemos recibido tus respuestas y el PDF. Si quieres, envíanoslo también por WhatsApp o email.'; })
+        .catch(function(){ nm.hidden=false; nm.className='msg err'; nm.textContent='No hemos podido recibir el envío automático. Descarga el PDF y envíanoslo por WhatsApp o email.'; });
+    }
+  });
+  document.getElementById('copy').addEventListener('click',function(){
+    var out=document.getElementById('out'), c=document.getElementById('cmsg');
+    function sel(){ out.focus(); out.select(); c.textContent='Texto seleccionado: cópialo con Ctrl+C o manteniendo pulsado en el móvil.'; }
+    try{ navigator.clipboard.writeText(out.value).then(function(){ c.textContent='Texto copiado.'; },sel); }catch(e){ sel(); }
+  });
+  load(); progress();
+})();
+</script>
+<script>
+document.getElementById('mt').addEventListener('click',function(){document.body.classList.toggle('menu-open')});
+document.getElementById('sn').addEventListener('click',function(e){if(e.target.closest('a'))document.body.classList.remove('menu-open')});
+</script>
+</body>
+</html>
