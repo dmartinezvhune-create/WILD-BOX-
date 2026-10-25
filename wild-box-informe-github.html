@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wild Box · Informe de diagnóstico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: informe de diagnóstico de una columna con índice fijo — resumen, estado por áreas, frenos, veredicto, propuesta en tres horizontes, condiciones y anexo. Sistema VOID/GOLD de Closer Search, tema oscuro único. */
+:root{
+  --void:#060606; --panel:#101010; --panel-2:#161512; --line:#28251f;
+  --ink:#EDE7D8; --ink-dim:#B4AC98; --ink-faint:#857E6E;
+  --gold:#C9A84C; --gold-soft:#C9A96E; --gold-dim:#8E763A; --gold-glow:rgba(201,168,76,.09);
+  --ok:#8FC9A0; --warn:#E3B566; --bad:#E39380;
+  --display:"Cormorant Garamond",Georgia,serif; --caps:"Cinzel",Georgia,serif; --body:"DM Sans",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{background:var(--void);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.65;-webkit-font-smoothing:antialiased;text-align:left;hyphens:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--void)}
+h1,h2,h3,h4{font-family:var(--display);color:#fff;margin:0;line-height:1.15;font-weight:700;text-wrap:balance}
+h1{font-size:clamp(36px,7vw,62px);letter-spacing:-.01em}
+h1 em{font-style:italic;color:var(--gold)}
+h2{font-size:clamp(27px,4.4vw,36px)}
+h3{font-size:21px;font-weight:600}
+h4{font-size:18px;font-weight:600}
+p{margin:0}
+a{color:var(--gold)}
+ul,ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px}
+li::marker{color:var(--gold)}
+b,strong{color:#fff;font-weight:600}
+.tag{font-family:var(--caps);font-size:11.5px;letter-spacing:.17em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.dim{color:var(--ink-dim)}
+.faint{color:var(--ink-faint);font-size:14px}
+
+.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(6,6,6,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.toc-in{max-width:1080px;margin:0 auto;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.toc-in::-webkit-scrollbar{display:none}
+.toc a{flex:0 0 auto;font-size:13px;color:var(--ink-dim);text-decoration:none;padding:6px 11px;border:1px solid var(--line);border-radius:3px;white-space:nowrap}
+.toc a:hover,.toc a:focus-visible{color:var(--gold);border-color:var(--gold-dim);outline:none}
+.brand{display:flex;align-items:center;gap:10px;flex:0 0 auto;padding-right:8px;margin-right:4px;border-right:1px solid var(--line)}
+.brand svg{width:24px;height:24px}
+.brand span{font-family:var(--caps);font-size:13px;letter-spacing:.08em;color:#fff;font-weight:600}
+.brand span i{font-style:normal;color:var(--gold)}
+
+.hero{border-bottom:1px solid var(--line);background:radial-gradient(ellipse at 88% 0%,rgba(201,168,76,.14),transparent 55%),radial-gradient(ellipse at 0% 100%,rgba(201,168,76,.05),transparent 50%)}
+.hero-in{max-width:1080px;margin:0 auto;padding-block:64px 52px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+.lede{max-width:720px;font-size:18px;color:var(--ink-dim)}
+.for{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--ink-faint)}
+.for b{color:var(--gold-soft)}
+
+.wrap{max-width:880px;margin:0 auto;padding-block:8px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column}
+section{display:flex;flex-direction:column;gap:18px;padding-block:52px;border-bottom:1px solid var(--line);scroll-margin-top:64px}
+section:last-of-type{border-bottom:0}
+.shead{display:flex;flex-direction:column;gap:8px}
+.shead .tag::before{content:attr(data-n) " · ";color:var(--gold-dim)}
+.intro{color:var(--ink-dim);max-width:70ch}
+
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.sum{background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.sum.ok{border-top-color:var(--ok)}
+.sum.warn{border-top-color:var(--warn)}
+.sum ul{font-size:14.5px;color:var(--ink-dim)}
+
+.verdict{background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:26px;display:flex;flex-direction:column;gap:14px}
+.verdict .big{font-family:var(--display);font-size:clamp(23px,3.6vw,29px);color:#fff;font-weight:600;line-height:1.3}
+.verdict .big em{font-style:italic;color:var(--gold)}
+.pill{display:inline-block;font-family:var(--caps);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:3px;font-weight:600;white-space:nowrap}
+.pill.ok{background:rgba(143,201,160,.12);color:var(--ok);border:1px solid rgba(143,201,160,.4)}
+.pill.warn{background:rgba(227,181,102,.13);color:var(--warn);border:1px solid rgba(227,181,102,.4)}
+.pill.bad{background:rgba(227,147,128,.12);color:var(--bad);border:1px solid rgba(227,147,128,.4)}
+.pill.gold{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold-dim)}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.box p{color:var(--ink-dim);font-size:15px}
+.box.hl{border-color:var(--gold-dim);background:linear-gradient(180deg,rgba(201,168,76,.06),transparent 70%),var(--panel)}
+.box.risk{border-color:rgba(227,147,128,.35)}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--caps);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dim);font-weight:600;background:var(--panel-2)}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.hl td{background:var(--gold-glow);color:#fff;font-weight:600}
+td.area{font-weight:600;color:#fff;white-space:nowrap}
+
+.funnel{display:flex;flex-direction:column;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px}
+.frow{display:grid;grid-template-columns:180px 1fr 64px;gap:12px;align-items:center;font-size:14px}
+.frow .lab{color:var(--ink-dim)}
+.frow .track{height:22px;background:#0b0b0a;border-radius:3px;overflow:hidden}
+.frow .bar{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold))}
+.frow .bar.lost{background:repeating-linear-gradient(45deg,rgba(227,147,128,.35) 0 6px,rgba(227,147,128,.15) 6px 12px)}
+.frow .val{text-align:right;font-variant-numeric:tabular-nums;color:#fff;font-weight:600}
+
+.note{border-left:2px solid var(--gold);background:var(--gold-glow);padding:13px 16px;border-radius:0 4px 4px 0;font-size:15px;color:var(--ink-dim)}
+.note b{color:var(--gold)}
+.note.risk{border-left-color:var(--bad);background:rgba(227,147,128,.07)}
+.note.risk b{color:var(--bad)}
+
+.horizons{display:flex;flex-direction:column;gap:16px}
+.hz{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.hz-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;padding:18px 22px;background:var(--panel-2);border-bottom:1px solid var(--line)}
+.hz-head h3{flex:1 1 260px}
+.hz-head .when{font-family:var(--caps);font-size:12px;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;font-weight:600}
+.hz-body{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0}
+.hz-col{padding:18px 22px;display:flex;flex-direction:column;gap:9px;min-width:0;border-right:1px solid var(--line)}
+.hz-col:last-child{border-right:0}
+.hz-col .who{font-family:var(--caps);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dim);font-weight:600}
+.hz-col ul{font-size:14.5px;color:var(--ink-dim)}
+.hz-col.gate{background:rgba(201,168,76,.04)}
+
+.team{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.role{background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:6px;padding:18px 20px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.role .when{font-size:12.5px;color:var(--ink-faint)}
+.role ul{font-size:14.5px;color:var(--ink-dim)}
+
+.big20{display:grid;grid-template-columns:auto 1fr;gap:20px 28px;align-items:center;background:var(--panel);border:1px solid var(--gold-dim);border-radius:8px;padding:26px}
+.big20 .n{font-family:var(--display);font-size:96px;line-height:.9;color:var(--gold);font-weight:700}
+.big20 .t{display:flex;flex-direction:column;gap:8px;min-width:0}
+.checks{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+.checks li{padding-left:26px;position:relative;color:var(--ink-dim);font-size:15px}
+.checks li::before{content:"";position:absolute;left:2px;top:7px;width:12px;height:7px;border-left:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(-45deg)}
+.checks.no li::before{content:"×";border:0;transform:none;top:-1px;left:3px;color:var(--bad);font-size:18px;font-weight:700}
+
+.timeline{display:flex;flex-direction:column;border-left:1px solid var(--gold-dim);margin-left:6px}
+.tl{position:relative;padding:0 0 22px 26px;display:flex;flex-direction:column;gap:5px}
+.tl:last-child{padding-bottom:0}
+.tl::before{content:"";position:absolute;left:-6px;top:6px;width:11px;height:11px;border-radius:50%;background:var(--void);border:2px solid var(--gold)}
+.tl .when{font-family:var(--caps);font-size:12px;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;font-weight:600}
+.tl p,.tl li{color:var(--ink-dim);font-size:15px}
+
+.quote{font-family:var(--display);font-style:italic;font-size:21px;color:var(--gold-soft);line-height:1.35;border-left:2px solid var(--gold);padding:4px 0 4px 18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font-size:14px;padding:6px 12px;border:1px solid var(--line);border-radius:3px;color:var(--ink-dim);background:var(--panel)}
+
+.sign{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.sign .name{font-family:var(--display);font-size:24px;color:#fff;font-weight:600}
+.foot{border-top:1px solid var(--line);margin-top:36px;padding-top:20px;font-size:13px;color:var(--ink-faint)}
+
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (max-width:760px){
+  .summary{grid-template-columns:1fr}
+  .big20{grid-template-columns:1fr}
+  .big20 .n{font-size:76px}
+  .hz-col{border-right:0;border-bottom:1px solid var(--line)}
+  .hz-col:last-child{border-bottom:0}
+}
+@media (max-width:560px){
+  .frow{grid-template-columns:1fr 56px;gap:4px 10px}
+  .frow .lab{grid-column:1/-1}
+  .hero-in{padding-block:44px 40px}
+  td.area{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+
+<style>
+/* Capa web: cabecera fija con menús, héroe de portada, bandas a ancho completo y pie de página */
+:root{--hh:76px;--band:#0B0B0A}
+html{scroll-padding-top:calc(var(--hh) + 20px)}
+body{padding-top:calc(var(--hh) + env(safe-area-inset-top,0px))}
+header.site{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(6,6,6,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.site-inner{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));height:var(--hh);display:flex;align-items:center;justify-content:space-between;gap:20px}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.logo svg{width:38px;height:38px;flex:0 0 auto}
+.logo-text{display:flex;flex-direction:column;line-height:1.15}
+.brand-name{font-family:var(--caps);font-weight:600;font-size:1.02rem;color:#fff;letter-spacing:.08em}
+.brand-name .search{color:var(--gold)}
+.logo-sub{font-family:var(--display);font-style:italic;font-size:.86rem;color:var(--ink-faint)}
+.site-nav{display:flex;align-items:center;gap:4px}
+.site-nav>a,.dd-btn{color:var(--ink-dim);text-decoration:none;font-family:var(--body);font-size:.9rem;font-weight:500;padding:10px 13px;background:none;border:none;cursor:pointer;border-radius:4px}
+.site-nav>a:hover,.dd-btn:hover,.dd:focus-within .dd-btn{color:var(--gold-soft)}
+.caret{font-size:.7rem;opacity:.7}
+.dd{position:relative}
+.dd-menu{position:absolute;top:100%;left:0;min-width:260px;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:0 0 6px 6px;padding:8px 0;display:none;box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.dd:hover .dd-menu,.dd:focus-within .dd-menu{display:block}
+.dd-menu a{display:flex;gap:10px;padding:9px 18px;color:var(--ink-dim);text-decoration:none;font-size:.88rem}
+.dd-menu a span{font-family:var(--caps);color:var(--gold-dim);font-size:.75rem;min-width:20px;padding-top:2px}
+.dd-menu a:hover{color:var(--gold-soft);background:var(--gold-glow)}
+.site-nav>a.nav-cta{background:var(--gold);color:#060606;font-weight:600;margin-left:8px;padding:11px 20px}
+.site-nav>a.nav-cta:hover{background:var(--gold-soft)}
+.menu-toggle{display:none;background:none;border:1px solid var(--line);border-radius:4px;width:44px;height:44px;cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:5px}
+.menu-toggle span{display:block;width:20px;height:2px;background:var(--gold)}
+
+.web-hero{border-bottom:1px solid var(--line);background:radial-gradient(ellipse at 85% 0%,rgba(201,168,76,.15),transparent 55%),radial-gradient(ellipse at 0% 100%,rgba(201,168,76,.06),transparent 50%)}
+.web-hero .hero-in{max-width:1180px;margin:0 auto;padding-block:84px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-family:var(--caps);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:10px}
+.eyebrow svg{width:18px;height:18px}
+.web-hero h1{font-size:clamp(38px,6.4vw,64px);max-width:920px}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.btn-primary,.btn-secondary{display:inline-block;text-decoration:none;font-family:var(--body);font-weight:600;font-size:.95rem;padding:15px 26px;border-radius:4px;transition:.15s;text-align:center}
+.btn-primary{background:var(--gold);color:#060606}
+.btn-primary:hover{background:var(--gold-soft)}
+.btn-secondary{border:1px solid var(--gold-dim);color:var(--gold-soft)}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:30px;background:var(--line);border:1px solid var(--line);border-radius:6px;overflow:hidden;max-width:980px}
+.hero-stats>div{background:var(--panel);padding:20px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.hero-stats .n{font-family:var(--display);font-weight:700;font-size:2.1rem;color:var(--gold);line-height:1;font-variant-numeric:tabular-nums}
+.hero-stats .l{font-size:.8rem;color:var(--ink-dim);line-height:1.4}
+
+main.site-main{display:block}
+section.band{display:block;gap:0;padding:0;border-bottom:1px solid var(--line);scroll-margin-top:calc(var(--hh) + 10px)}
+section.band:nth-of-type(even){background:var(--band)}
+section.band>.inner{max-width:1080px;margin:0 auto;padding-block:72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:20px}
+section.band .shead h2{font-size:clamp(30px,4.6vw,42px)}
+section.band:last-of-type{border-bottom:0}
+table.tasks tr.grp td{font-family:var(--caps);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:var(--panel-2);font-weight:600}
+table.tasks td.when-c{white-space:nowrap;color:#fff}
+@media (max-width:560px){table.tasks td.when-c{white-space:normal}}
+/* Texto justificado sin estirarse: columnas más anchas, sin cortar palabras */
+p,li,.lede,.intro,.box p,.quote{text-align:justify;text-align-last:left;hyphens:none;-webkit-hyphens:none;word-break:normal;overflow-wrap:normal}
+td,.hero-stats .l,.faint,.dim,.note,.sign p,.foot,.ft-bottom,.ft-brand p,.tl p,.tl li,.role li,.hz-col li,.sum li,.box li,ol li{text-align:justify;text-align-last:left;hyphens:none;-webkit-hyphens:none}
+th,td.n,td.when-c,td.area,.tag,.pill,.when,.who,.chips span,h1,h2,h3,h4,.for{text-align:left}
+td.n{text-align:right}
+section.band>.inner{max-width:940px}
+.web-hero .hero-in>.lede{max-width:820px}
+.summary{grid-template-columns:1fr}
+.summary .sum{display:grid;grid-template-columns:150px 1fr;gap:12px 20px;align-items:start}
+.grid2{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+.grid3{grid-template-columns:repeat(auto-fit,minmax(380px,1fr))}
+.team{grid-template-columns:1fr}
+.role{display:grid;grid-template-columns:220px 1fr;gap:8px 24px;align-items:start}
+.role>.pill,.role>h4,.role>.when{grid-column:1}
+.role>ul{grid-column:2;grid-row:1 / span 3}
+.hz-body{grid-template-columns:1fr}
+.hz-col{border-right:0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:200px 1fr;gap:8px 24px}
+.hz-col:last-child{border-bottom:0}
+.verdict ul li,.checks li{text-align:justify;text-align-last:left}
+@media (max-width:760px){
+  .grid2,.grid3{grid-template-columns:1fr}
+  .summary .sum,.role,.hz-col{grid-template-columns:1fr}
+  .role>ul{grid-column:1;grid-row:auto}
+}
+@media (max-width:520px){
+  .box,.role,.sum,.hz-col,.verdict{padding-left:14px;padding-right:14px}
+  .box p,.box li,.role li,.hz-col li,.sum li,.dim,.intro,.lede{font-size:14.5px;line-height:1.6}
+  section.band>.inner{padding-left:max(14px,env(safe-area-inset-left,0px));padding-right:max(14px,env(safe-area-inset-right,0px))}
+}
+
+section.band>.inner>*{min-width:0;max-width:100%}
+.tbl{max-width:100%}
+th.n{white-space:normal}
+.cobrand{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.cobrand img{width:72px;height:72px;border-radius:50%;border:1px solid var(--gold-dim);object-fit:cover}
+.cobrand .x{font-family:var(--display);font-size:28px;color:var(--gold-dim)}
+.cobrand .cs{width:60px;height:60px}
+
+.site-footer{padding-block:56px 30px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));background:var(--panel);border-top:1px solid var(--line)}
+.ft-grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:34px}
+.ft-grid h5{font-family:var(--caps);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0 0 12px}
+.ft-grid span,.ft-grid a{display:block;color:var(--ink-dim);text-decoration:none;font-size:.88rem;margin-bottom:8px}
+.ft-grid a:hover{color:var(--gold-soft)}
+.ft-brand p{font-size:.88rem;color:var(--ink-faint);margin-top:14px;max-width:340px}
+.ft-sign{font-family:var(--display);font-size:1.25rem;color:#fff;font-weight:600}
+.ft-bottom{max-width:1180px;margin:34px auto 0;padding-top:20px;border-top:1px solid var(--line);font-size:.78rem;color:var(--ink-faint)}
+
+@media (max-width:1060px){
+  .menu-toggle{display:flex}
+  header.site{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--void)}
+  .site-nav{display:none;position:fixed;top:calc(var(--hh) + env(safe-area-inset-top,0px));left:0;right:0;height:calc(100vh - var(--hh));background:var(--void);flex-direction:column;align-items:stretch;gap:0;padding:12px max(22px,env(safe-area-inset-right,0px)) 40px max(22px,env(safe-area-inset-left,0px));overflow-y:auto;border-top:1px solid var(--line)}
+  body.menu-open .site-nav{display:flex}
+  .site-nav>a,.dd-btn{padding:14px 4px;font-size:1rem;text-align:left;border-bottom:1px solid var(--line);border-radius:0}
+  .dd-btn{width:100%}
+  .dd-menu{display:block;position:static;border:none;box-shadow:none;background:none;padding:0 0 8px 12px;min-width:0}
+  .dd-menu a{padding:10px 4px}
+  .site-nav>a.nav-cta{margin:18px 0 0;text-align:center;border-bottom:none}
+}
+@media (max-width:760px){
+  .hero-stats{grid-template-columns:1fr 1fr}
+  .ft-grid{grid-template-columns:1fr}
+  section.band>.inner{padding-block:52px}
+  .web-hero .hero-in{padding-block:52px 44px}
+}
+@media (max-width:520px){
+  .logo-sub{display:none}
+  .btn-primary,.btn-secondary{width:100%}
+}
+/* === Comité de maquetación · Justificado sin estirarse (v1) === */
+/* 1. Reglas generales: justificado limpio, sin guiones, sin cortes feos */
+p,li,td{text-wrap:pretty;word-spacing:-.01em}
+td.n,th.n{text-align:center!important;text-align-last:center!important}
+td.n[colspan]{text-align:center!important}
+.nw{white-space:nowrap}
+/* 2. Rótulos y pies cortos: no son texto corrido, a la izquierda */
+.hero-stats .l,.verdict .big,.sign .faint,.role .when,td.area,
+#areas td:first-child,#frenos td:first-child,#equipo td:first-child,#condiciones td:first-child,#cuadrar td:first-child{text-align:left;text-align-last:left}
+/* 3. Tablas de escritorio: anchos mínimos para las columnas de texto */
+.tbl table{table-layout:auto}
+.tbl td{line-height:1.55}
+.tbl td:first-child{min-width:150px}
+#cuadrar td:nth-child(1){width:20%}
+#cuadrar td:nth-child(2){width:34%}
+#anexo .tbl td:first-child{width:36%}
+/* 4. Móvil: tarjetas más anchas y listas con sangría corta */
+@media (max-width:760px){
+  section.band>.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .box,.role,.sum,.hz-col,.verdict,.big20{padding-left:14px;padding-right:14px}
+  .hz-head{padding-left:14px;padding-right:14px}
+  .box ul,.role ul,.sum ul,.hz-col ul,.verdict ul,ul.dim,ol.dim{padding-left:15px}
+  .box p,.box li,.role li,.hz-col li,.sum li,.verdict li,.checks li,.dim,.intro,.lede,.note,.tl p,.faint{font-size:14px;line-height:1.62}
+  .checks li{padding-left:22px}
+  .quote{font-size:19px;padding-left:14px}
+  .verdict .big{font-size:22px}
+  .hero-stats{grid-template-columns:1fr}
+  .hero-stats>div{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:14px;padding:14px 16px}
+  .hero-stats .n{font-size:1.8rem}
+  .hero-stats .l{font-size:.86rem}
+  /* 5. Tablas → tarjetas apiladas (requiere data-label en cada td) */
+  .tbl{overflow:visible;background:none;border:0}
+  .tbl table,.tbl tbody,.tbl tr,.tbl td{display:block;width:auto!important;min-width:0}
+  .tbl thead{display:none}
+  .tbl tr{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:10px}
+  .tbl tr.hl{border-color:var(--gold-dim);background:linear-gradient(180deg,rgba(201,168,76,.07),transparent),var(--panel)}
+  .tbl tr.hl td{background:none}
+  .tbl td{border:0;padding:0;font-size:14px;line-height:1.6;white-space:normal!important}
+  .tbl td+td{margin-top:8px}
+  .tbl td:first-child{font-weight:600;color:#fff;font-size:15px;text-align:left;text-align-last:left}
+  .tbl td[data-label]:not(:first-child)::before{content:attr(data-label);display:block;font-family:var(--caps);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-dim);font-weight:600;margin-bottom:2px;text-align:left}
+  .tbl td.n{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-variant-numeric:tabular-nums}
+  .tbl td.n::before{margin:0}
+  .tbl td.n[colspan]{color:#fff}
+  /* Estado por áreas: nombre + estado en una línea, motivo debajo a todo el ancho */
+  #areas .tbl tr{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+  #areas .tbl td+td{margin-top:0}
+  #areas .tbl td:nth-child(2)::before{display:none}
+  #areas .tbl td:nth-child(3){grid-column:1/-1}
+  /* Tareas: grupos como rótulos, meta (responsable, fecha, imprescindible) en una fila */
+  table.tasks tr.grp{background:none;border:0;padding:18px 0 4px;margin:0}
+  table.tasks tr.grp td{background:none;font-size:11px;color:var(--gold)}
+  table.tasks tr:not(.grp){display:grid;grid-template-columns:1fr 1fr auto;gap:8px 12px;align-items:end}
+  table.tasks tr:not(.grp) td:first-child{grid-column:1/-1}
+  table.tasks tr:not(.grp) td+td{margin-top:0;font-size:13.5px}
+  table.tasks td.when-c{color:#fff}
+}
+@media (max-width:360px){table.tasks tr:not(.grp){grid-template-columns:1fr 1fr}}
+
+/* Accesibilidad y menú */
+section.band{scroll-margin-top:0}
+th,.hz-col .who,.dd-menu a span,.shead .tag::before{color:var(--gold-soft)}
+.ft-grid a{padding-block:11px;margin-bottom:0}
+.dd-menu a{min-height:44px;align-items:center}
+@media (max-width:1060px){
+  .site-nav{height:calc(100dvh - var(--hh) - env(safe-area-inset-top,0px))}
+  body.menu-open{overflow:hidden}
+  .dd-btn{pointer-events:none;font-family:var(--caps);font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .dd-btn .caret{display:none}
+  .menu-toggle span{transition:transform .2s,opacity .2s}
+  body.menu-open .menu-toggle span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  body.menu-open .menu-toggle span:nth-child(2){opacity:0}
+  body.menu-open .menu-toggle span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+}
+@media (max-width:760px){.tbl td.n{justify-content:space-between!important;text-align:right!important}}
+/* ===== Parche del comité de maquetación ===== */
+:root{--wrap:1000px;--label:#A88D4A}
+html,body{margin:0}
+html{scroll-padding-top:calc(var(--hh) - 24px)}
+section.band{scroll-margin-top:0}
+
+/* Una sola rejilla: cabecera, portada, secciones y pie alineados */
+.site-inner,.web-hero .hero-in,section.band>.inner,.ft-grid,.ft-bottom{max-width:var(--wrap)}
+section.band:nth-of-type(even){background:#0D0C0A}
+
+/* Cifras de Cormorant con números de caja alta (no "3 de 5" en minúscula antigua) */
+h1,h2,h3,h4,.quote,.hero-stats .n,.big20 .n,.verdict .big,.sign .name,.ft-sign{font-variant-numeric:lining-nums}
+
+/* Portada: logos en panel a la derecha, sin hueco vacío */
+.web-hero .hero-in{display:grid;grid-template-columns:minmax(0,1fr) 260px;column-gap:56px;row-gap:20px;align-items:start}
+.web-hero .hero-in>*{grid-column:1}
+.web-hero .cobrand{grid-column:2;grid-row:1 / span 5;align-self:center;flex-direction:column;justify-content:center;gap:14px;padding:34px 20px;border:1px solid var(--line);border-radius:8px;background:radial-gradient(circle at 50% 30%,rgba(201,168,76,.10),transparent 70%),var(--panel)}
+.web-hero .cobrand .cs{width:92px;height:92px}
+.web-hero .cobrand img{width:112px;height:112px}
+.web-hero .cobrand .x{line-height:1;font-size:26px}
+.web-hero .hero-stats,.web-hero .for{grid-column:1 / -1;max-width:none}
+.web-hero h1{max-width:none}
+.hero-stats .l{text-align:left}
+
+/* Píldoras: tamaño de etiqueta, nunca estiradas como barras */
+.verdict>.pill,.box>.pill,.role>.pill,.sum>.pill,.hz-head>.pill{align-self:start;justify-self:start;width:auto}
+.summary .sum{grid-template-columns:170px 1fr}
+
+/* Ritmo: más aire antes de cada subapartado */
+section.band>.inner>h3{margin-top:22px}
+section.band>.inner>.shead+h3{margin-top:4px}
+
+/* Etiquetas pequeñas legibles (AA) */
+th,.hz-col .who{color:var(--label)}
+
+/* Texto: justificado solo en prosa; tablas y etiquetas a la izquierda */
+td,td *,th,.hero-stats .l,.ft-grid span{text-align:left!important;text-align-last:left!important}
+td.n,th.n,td.n *{text-align:center!important;text-align-last:center!important}
+.sum li,.hz-col li,.role li{text-align:left}
+
+/* Tablas de texto: primera columna con ancho fijo y aire entre filas */
+.tbl td{padding:13px 16px}
+#condiciones .tbl:not(:has(th.n)) td:first-child,#anexo .tbl td:first-child{width:30%}
+
+table.tasks td{padding:10px 16px}
+table.tasks td:nth-child(2){white-space:nowrap}
+
+/* Pie */
+.ft-grid,.ft-bottom{max-width:calc(var(--wrap) - 32px)}
+.ft-grid .logo span{display:inline;margin:0;font-size:inherit;color:inherit}
+.ft-grid .logo .logo-text{display:flex}
+.ft-grid .logo .brand-name{display:block;font-size:1.02rem;color:#fff}
+.ft-grid .logo .brand-name .search{color:var(--gold)}
+.ft-grid .logo .logo-sub{display:block;font-size:.86rem;color:var(--ink-faint)}
+.ft-grid .ft-sign{font-size:1.25rem;color:#fff;margin-bottom:4px}
+.site-footer{padding-bottom:36px}
+
+@media (max-width:1060px){.web-hero .hero-in{grid-template-columns:minmax(0,1fr) 210px;column-gap:32px}}
+@media (max-width:760px){
+  .web-hero .hero-in{grid-template-columns:1fr}
+  .web-hero .cobrand{grid-column:1;grid-row:auto;flex-direction:row;justify-content:flex-start;padding:0;border:0;background:none}
+  .web-hero .cobrand .cs{width:60px;height:60px}
+  .web-hero .cobrand img{width:72px;height:72px}
+}
+
+
+/* Celdas de tabla y tarjetas de tabla en móvil: siempre a la izquierda, nunca justificadas */
+.tbl td,.tbl td *{text-align:left!important;text-align-last:left!important}
+.tbl td.n,.tbl th.n{text-align:center!important;text-align-last:center!important}
+@media (max-width:760px){.tbl td.n{text-align:right!important;justify-content:space-between}}
+@media (max-width:760px){.tbl td,table.tasks td{padding:0!important}.tbl tr{padding:14px!important}.tbl td+td{margin-top:6px}}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="site-inner">
+    <a class="logo" href="#top"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="logo-text"><span class="brand-name">CLOSER<span class="search"> SEARCH</span></span><span class="logo-sub">Selección de talento de cierre</span></span></a>
+    <button class="menu-toggle" type="button" aria-label="Abrir el menú" id="mt"><span></span><span></span><span></span></button>
+    <nav class="site-nav" id="sn" aria-label="Secciones"><div class="dd"><button class="dd-btn" type="button">Diagnóstico <span class="caret">▾</span></button><div class="dd-menu"><a href="#resumen"><span>01</span>En una página</a><a href="#areas"><span>02</span>Estado por áreas</a><a href="#funciona"><span>03</span>Lo que funciona</a><a href="#frenos"><span>04</span>Lo que frena</a><a href="#veredicto"><span>05</span>Veredicto</a></div></div><div class="dd"><button class="dd-btn" type="button">Propuesta <span class="caret">▾</span></button><div class="dd-menu"><a href="#propuesta"><span>06</span>Corto, medio y largo plazo</a><a href="#equipo"><span>07</span>Cómo trabajará el equipo</a><a href="#marketing"><span>08</span>Marketing y equipo de cierre</a></div></div><div class="dd"><button class="dd-btn" type="button">Condiciones <span class="caret">▾</span></button><div class="dd-menu"><a href="#condiciones"><span>09</span>Condiciones económicas</a><a href="#limites"><span>10</span>Lo que diremos y lo que no</a><a href="#cuadrar"><span>11</span>Datos que cuadraremos</a></div></div><div class="dd"><button class="dd-btn" type="button">Siguientes pasos <span class="caret">▾</span></button><div class="dd-menu"><a href="#pasos"><span>12</span>Próximos pasos</a><a href="#anexo"><span>13</span>Anexo: cómo hablará el equipo</a></div></div><a class="nav-cta" href="#pasos">Próximos pasos</a></nav>
+  </div>
+</header>
+<div class="web-hero" id="top">
+  <div class="hero-in">
+    <div class="cobrand"><svg class="cs" viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="x">×</span><img src="data:image/png;base64,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l/m+7Re3/c2eO//nrbf+etfu7Tu2D1955aEPD950w03bt21zfbnzHnZs377nzj3btm+zunjD9df/cs8vt1y+xezNkqP7/3bv3v3z664zNXbCvJ9juHft2oXdLkz76KOPfn3Pr997911HzznQCoNBGgN8+cUXG9av/8e7/+myzZtdV4pCp+wYv22/etu11/zU3TiONjAiWH/Rxb78c8ABCxufDDqWq16ipV6SonqRzbarr2YVP/nkEy+KhamVn5sJYjP85KRLfqz1aLteeou0Nu0QBTerM3SSIKExl2zcCLKahVf/quCt7v/97+9vuvmmKx1yuWzZZx9/unowL+ntWa6rcwFlDLXyFRJVs0iKAOyllFZMGQyCCAOwPHZJ+cADnbNhDRhDQZI01j0d0PEU4AQZyseJCW3v5hRZxazZvOapp57S39p7afT+7LPPOgopJryzc+IFbPpzUs5v7v0XCH1X7oyVnTt3koGuwgfHDgi4/1/vf/W/X9XhE+GOHTseeeQRPYqTrMvWvf766w8//PBLL7109913uxTCCZGHDx9+8sknDxw4oDjn6zj9+JVXXtm3b99feMM+PfX2/ncV95nrAK+9VkZS9F7nnbff/ttf/cqS9PuHDz73X8+rEKMHv4VfpsnKFnYzTcq9798ehNYbJUcZ3vV3f29aZqfQiy++eM899yjo4MGDyJB98+bNLpKW13kkMjp4UjXvuOMOhtRZCaQi7Dx8h/ved999jz/++P333690h3MRMEsLiQDzWzzsnY0XirhObGLMUiRBi0iBFGqoqfk9MYEJecdaQImr1bOmNMWlQ2JKMIYDMQDo5oxvlQpAosb48ssvkwfizp4+67S3Q4cOGTEhmsCcIuZrf041Xn311Wi5Q0PiCdgSBoH94Z0/PProoxb77RjTFN58800HsrBpsijCYlV0AFNT2ErMCFMxOvrYY4/957//B5YheeLESahI8emnn9YmovmvXr3/vfewT0HyogdypV911VUkhDtg6A1lwi+PGIQ1ivAWyWEH+/fvpz2alOPoFcFCgFEdubRUAOwNXg8PD7/xxhuaFGDUam2Ou9cLqiB5P/jgg+i87trrXDiMbDKm2SIJWFlqChIxxpw12yEt8YrQttBD4RTtGx3CxgQzE9MM3FZuSUfFZSwnSx+BltxiAJd9YQgw5onn5lIlypoFXrrpUoBkNj467lMuiJ555hlkXXPdNUhUGalqghQOa/AdEQIffPABUkgFgzB37NgoBqmGtrZ9+/ZaznjttdcI0m2NIokc92WPdpqGQSmqCgPLI7ICJKEa9IlUxo+MXLTlMvNtt64qRTyLrcKwcQJqZl1SdSrsEWaolIJBpEUAmoIw4lWNzZQRPIJB6gucXID7mA4DePHCKiis+h6pqSzEMDk1WRd+i5GXSMgbSVH3sTEBGdetWVsBlMAgF19x9agIVfYou/u8bYOJ1H6GM1aFojMMdbQnLw2mPD5r46o5yCNnVxereVNTKikVsLdItgQJq7m2M3UyTkOCTY8lAKGuCDf5OILoW265xV3a6uCOD+2XFGHT1ohQGF1HPv8Sj5xwRiOVIpLSaLZQaTfYocXsvfdeqADrt1VbEo4jbNlAnJ5EHmenZtx05QJvCkRN9+7dyyRgNCKRAefWrVtpUokN8bC50eqBBx7AdG0fSSBLHeEvwqDVStCsLAS7SsKJCdqlx9tvv93uRZViLZT7xBNPIEPRmCOgoWP9rbfeqq3ICIlyMUeSx2I4qhSKgWoBTNUAkAJHQJKUXjAVI1xO6v8DxHv3VrGDc4sAAAAASUVORK5CYII=" alt="Logotipo de Wild Box"></div>
+    <div class="eyebrow"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Closer Search · Informe de diagnóstico · Wild Box</div>
+    <h1>El presencial funciona. <em>El online está por demostrar.</em></h1>
+    <p class="lede">Este es el diagnóstico de Closer Search sobre Wild Box después de analizar, una a una, todas tus respuestas al cuestionario de colaboración y lo que nos contaste en la llamada. Te contamos con total honestidad cómo lo vemos: lo que está listo, lo que todavía no lo está y lo que te proponemos a corto, medio y largo plazo.</p>
+    <div class="hero-ctas">
+      <a class="btn-primary" href="#veredicto">Ver el veredicto</a>
+      <a class="btn-secondary" href="#propuesta">Ver la propuesta</a>
+    </div>
+    <div class="hero-stats">
+      <div><span class="n">3 de 5</span><span class="l">reuniones presenciales que cierras hoy</span></div>
+      <div><span class="n">50 de 100</span><span class="l">contactos del formulario con los que no se llega a hablar</span></div>
+      <div><span class="n">0</span><span class="l">clientes online hoy, con capacidad para 30–40</span></div>
+      <div><span class="n">20 %</span><span class="l">de comisión, sin cuota fija: solo cuando el equipo vende</span></div>
+    </div>
+    <div class="for"><span><b>Para</b> José Antonio Díaz Cervilla, CEO de Wild Box</span><span><b>Elaborado por</b> Closer Search</span><span><b>Fecha</b> 25 de octubre de 2026</span></div>
+  </div>
+</div>
+<main class="site-main">
+
+<section id="resumen" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="01">En una página</span><h2>Cómo vemos Wild Box</h2></div>
+  <div class="summary">
+    <div class="sum ok"><span class="pill ok">Está listo</span><ul>
+      <li>Un programa presencial que se vende: más de 110 clientes en cinco años y 6–7 altas al mes.</li>
+      <li>Tu cierre: según nos indicas, 3 de cada 5 reuniones presenciales.</li>
+      <li>Un método propio, con respaldo profesional y derivaciones de clínicas y hospital.</li>
+    </ul></div>
+    <div class="sum warn"><span class="pill warn">No está listo</span><ul>
+      <li>El online: sin clientes, con el embudo en construcción y sin pasarela de pago.</li>
+      <li>Cobro por Bizum, contactos en Excel y una agenda con rotaciones.</li>
+      <li>Fichas sin completar y algunos datos que no cuadran entre sí.</li>
+    </ul></div>
+    <div class="sum"><span class="pill gold">Lo que proponemos</span><ul>
+      <li><b>Corto plazo:</b> dos setters que atienden en minutos y agendan; tú cierras.</li>
+      <li><b>Medio plazo:</b> un closer online cuando haya volumen, para que delegues el online.</li>
+      <li><b>Largo plazo:</b> Premium, campañas por temporada y bases para crecer.</li>
+    </ul></div>
+  </div>
+  <p class="quote">Tu presencial está validado: lo que se pierde está antes de la reunión, y eso sí podemos arreglarlo desde diciembre. El online hoy es una apuesta, no un canal. Te proponemos empezar con lo que ya funciona, medirlo todo y decidir juntos a los 90 días con datos.</p>
+</div></section>
+
+<section id="areas" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="02">Diagnóstico por áreas</span><h2>El estado real de cada parte del negocio</h2><p class="intro">Así vemos en Closer Search cada área de Wild Box a partir de tus respuestas. «Listo» significa que puede funcionar desde el primer día; «casi listo», que funciona con ajustes; «por construir», que hoy no existe o no se puede usar todavía.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Área</th><th>Estado</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr><td class="area">Producto y método</td><td><span class="pill ok">Listo</span></td><td>Entrenamiento individual en Harbiz, guía nutricional flexible con 3.500–4.000 ideas, valoración inicial y revisión semanal. Titulación en Ciencias del Deporte con máster. Falta confirmar quién elabora la guía nutricional con cantidades y con qué titulación.</td></tr>
+      <tr><td class="area">Programa presencial</td><td><span class="pill ok">Listo</span></td><td>Más de 110 clientes, 6–7 altas al mes, grupos reducidos y renovación con cuota mensual.</td></tr>
+      <tr><td class="area">Online Básico</td><td><span class="pill warn">Casi listo</span></td><td>Ficha completa y precio definido, pero ningún cliente online todavía, ni testimonios ni resultados propios del online.</td></tr>
+      <tr><td class="area">Online Premium</td><td><span class="pill bad">Por construir</span></td><td>Precio sin cerrar, ficha casi vacía y diferencia con el Básico poco clara.</td></tr>
+      <tr><td class="area">Readaptación</td><td><span class="pill warn">Casi listo</span></td><td>Ya se vende en presencial dentro del grupo terapéutico. Falta su ficha como línea propia.</td></tr>
+      <tr><td class="area">Starter Performance</td><td><span class="pill bad">Por construir</span></td><td>La marcaste para la colaboración, pero su ficha está sin rellenar.</td></tr>
+      <tr><td class="area">Captación local</td><td><span class="pill warn">Casi listo</span></td><td>Funciona con 22 €/día y trae 65–70 contactos al mes, pero el volumen es bajo y una parte no encaja.</td></tr>
+      <tr><td class="area">Captación online</td><td><span class="pill bad">Por construir</span></td><td>El embudo con VSL está en construcción. Follow Me Ads hace crecer la comunidad; falta el paso de convertir esos seguidores en conversaciones.</td></tr>
+      <tr><td class="area">Proceso comercial</td><td><span class="pill warn">Casi listo</span></td><td>Buen cierre, pero tardas 1–2 días en responder, no hay guion completo y el seguimiento es manual.</td></tr>
+      <tr><td class="area">Cobro</td><td><span class="pill bad">Por construir</span></td><td>Bizum y cuotas que gestionas tú, sin pasarela ni enlaces de pago. Pierdes 3–4 de cada 10 ventas por el pago.</td></tr>
+      <tr><td class="area">Herramientas</td><td><span class="pill bad">Por construir</span></td><td>Contactos en Excel. El CRM y el calendario único están pendientes.</td></tr>
+      <tr><td class="area">Tu tiempo y tu agenda</td><td><span class="pill bad">Riesgo principal</span></td><td>Puedes atender 7–10 reuniones a la semana, con ciertas rotaciones. Es el límite real del crecimiento mientras cierres tú.</td></tr>
+      <tr><td class="area">Prueba social</td><td><span class="pill warn">Casi listo</span></td><td>Hay casos y fotos en presencial y reseñas en Google, pero faltan los permisos por escrito. En online no hay ninguno.</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="funciona" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="03">Lo que funciona</span><h2>Lo que Wild Box ya tiene resuelto</h2></div>
+  <div class="grid2">
+    <div class="box"><h4>La gente compra cuando habla contigo</h4><p>Cierras 3 de cada 5 reuniones presenciales, y lo haces rápido: cuando llamas en las primeras 24–48 horas, se cierra en la propia reunión. No tenemos registro de ese dato, pero es la referencia que tomamos y que hay que proteger.</p></div>
+    <div class="box"><h4>Un método que responde a tu cliente</h4><p>Tu cliente dice que ya probó dietas y gimnasio y lo dejó. Tu respuesta es educación nutricional sin dieta cerrada, un plan adaptado a 2–4 horas a la semana y acompañamiento semanal.</p></div>
+    <div class="box"><h4>Respaldo profesional</h4><p>Ciencias del Deporte, máster en entrenamiento personal, readaptación y entrenamiento de la mujer. Te derivan clientes clínicas de fisioterapia y el Hospital Comarcal de Motril.</p></div>
+    <div class="box"><h4>Clientes que se quedan</h4><p>Cinco años, más de 110 clientes, eventos y retos en la calle y reseñas en Google. Y cuando termina el programa, cada cliente sigue con una cuota de mantenimiento: en presencial, 150 € al trimestre o 174 € ilimitado. Ahí está buena parte del valor de cada cliente nuevo.</p></div>
+  </div>
+</div></section>
+
+<section id="frenos" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="04">Lo que hoy frena el crecimiento</span><h2>Cuatro frenos, por orden de importancia</h2></div>
+
+  <h3>1 · La mitad de los contactos no llega a hablar contigo</h3>
+  <p class="dim">Este es tu embudo presencial con tus propias cifras. Las barras están a escala sobre el punto medio de cada rango.</p>
+  <div class="funnel" role="img" aria-label="Embudo presencial: 100 contactos, 50 no se consigue contactar, 50 contactados, 10 a 15 agendan, 7 a 12 se presentan, unas 5 ventas">
+    <div class="frow"><span class="lab">Contactos del formulario</span><div class="track"><div class="bar" style="width:100%"></div></div><span class="val">100</span></div>
+    <div class="frow"><span class="lab">No se consigue contactar</span><div class="track"><div class="bar lost" style="width:50%"></div></div><span class="val">50</span></div>
+    <div class="frow"><span class="lab">Se consigue contactar</span><div class="track"><div class="bar" style="width:50%"></div></div><span class="val">50</span></div>
+    <div class="frow"><span class="lab">Agendan reunión</span><div class="track"><div class="bar" style="width:12.5%"></div></div><span class="val">10–15</span></div>
+    <div class="frow"><span class="lab">Se presentan</span><div class="track"><div class="bar" style="width:9.5%"></div></div><span class="val">7–12</span></div>
+    <div class="frow"><span class="lab">Se apuntan</span><div class="track"><div class="bar" style="width:5%"></div></div><span class="val">≈5</span></div>
+  </div>
+  <p class="dim">Lo llevas todo tú y respondes en 1–2 días. El contacto llega por formulario, no por conversación, y por eso el primer minuto cuenta. De los 50 con los que consigues hablar, unos 20 no encajan y otros 15–20 no agendan: ahí está el trabajo del setter. Además, entre un 20 y un 30 % de los que agendan no se presenta. Nuestra hipótesis es que parte de los contactos que hoy parecen no encajar se enfrían por la espera; lo comprobaremos midiendo qué pasa al responder en minutos.</p>
+
+  <h3>2 · Tu agenda pone el techo</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Para tu objetivo de 10 clientes locales y 10 online al mes</th><th class="n">Si el online cierra como el presencial (3 de 5)</th><th class="n">Si el online cierra en torno al 35 %</th></tr></thead>
+    <tbody>
+      <tr><td>Reuniones a las que debe presentarse la persona</td><td class="n">≈33</td><td class="n">≈45</td></tr>
+      <tr><td>Reuniones agendadas (con un 20–25 % de ausencias)</td><td class="n">≈42–44</td><td class="n">≈57–60</td></tr>
+      <tr class="hl"><td>Tu capacidad actual (7–10 reuniones a la semana)</td><td class="n" colspan="2">30–43 al mes</td></tr>
+    </tbody>
+  </table></div>
+  <p class="dim">Con tu objetivo vas a necesitar todos tus huecos, y puede que más: unas 4–5 horas semanales de reuniones y cerca de 8 horas de agenda reservada contando ausencias y márgenes, además de 1–2 horas para acompañar al equipo. El cierre online todavía no está medido. En enero, que es tu mejor mes, la agenda se llenará.</p>
+
+  <h3>3 · El cobro hace perder ventas</h3>
+  <p class="dim">Pierdes 3–4 de cada 10 ventas por precio o por no poder pagar de golpe. Hoy cobras por Bizum, con una reserva de 100 € y cuotas que gestionas tú, y abandona 1 de cada 10 clientes. Con una financiera o con una pasarela que guarde la tarjeta, cobras la venta completa en el momento y tu cliente paga a plazos.</p>
+
+  <h3>4 · El online parte de cero</h3>
+  <p class="dim">Tienes capacidad para 30–40 clientes online y otro entrenador disponible, pero hoy no hay ningún cliente, ni testimonios online, ni pasarela, y la VSL está en construcción. Los cerca de 40 seguidores nuevos al día que trae Follow Me Ads son comunidad ganada; el paso siguiente es convertirlos en conversaciones, empezando por los más de 2.000 pendientes de bienvenida.</p>
+
+  <p class="note"><b>El techo del presencial.</b> Con 65–70 contactos al mes, atender a tiempo mejora el local, pero de forma limitada: si pasamos de hablar con el 50 % a hablar con el 75–80 % de los contactos, con tus mismos ratios serían unas 2 ventas más al mes como mínimo, sin contar la reactivación ni la bajada de ausencias. Es una estimación. El crecimiento grande está en el online, y hoy parte de cero.</p>
+</div></section>
+
+<section id="veredicto" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="05">Veredicto</span><h2>Lo que vemos en Closer Search</h2></div>
+  <div class="verdict">
+    <span class="pill gold">Diagnóstico de Closer Search</span>
+    <p class="big">Wild Box tiene resuelto lo más difícil en presencial: <em>la gente compra cuando habla contigo.</em> En online todavía no hay nada probado, y lo vamos a tratar así.</p>
+    <ul>
+      <li><b>El presencial puede arrancar en diciembre.</b> Atender en minutos, agendar y recordar las reuniones mejora lo que ya funciona.</li>
+      <li><b>El online empieza pequeño.</b> Desde diciembre, el setter online puede agendar videollamadas por WhatsApp con tus seguidores para la preventa de enero si el cobro con tarjeta está listo. La VSL entrará cuando esté terminada.</li>
+      <li><b>Tu agenda es el límite.</b> Para crecer más allá de ella hará falta un closer online, y solo tiene sentido cuando haya volumen.</li>
+      <li><b>Hay trabajo previo.</b> Cobro, herramientas, fichas y datos tienen que estar resueltos antes de que el equipo hable con nadie.</li>
+    </ul>
+    <p class="dim">Por eso proponemos avanzar por horizontes: empezar con lo que ya funciona, medirlo todo y decidir juntos cada paso siguiente con datos, no con expectativas.</p>
+  </div>
+</div></section>
+
+<section id="propuesta" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="06">Nuestra propuesta</span><h2>Corto, medio y largo plazo</h2><p class="intro">Desde el primer día, Closer Search dirige el equipo comercial. Cada horizonte dice qué hace Closer Search, qué necesitamos de Wild Box y qué datos tienen que darse para pasar al siguiente. Si un indicador no se cumple, no se avanza: se ajusta.</p></div>
+  <div class="horizons">
+    <div class="hz">
+      <div class="hz-head"><span class="pill gold">Corto plazo</span><h3>Preparar y arrancar con lo que funciona</h3><span class="when">Noviembre 2026 – principios de marzo 2027</span></div>
+      <div class="hz-body">
+        <div class="hz-col"><span class="who">Closer Search</span><ul>
+          <li>Selección y formación de dos setters en noviembre.</li>
+          <li>Informe operativo y guía de llamada interactiva de Wild Box.</li>
+          <li>Desde el 1 de diciembre: atención en minutos a cada contacto local, agenda y recordatorios.</li>
+          <li>Bienvenida a los seguidores nuevos y reactivación de contactos que no se apuntaron y de antiguos clientes, con su consentimiento.</li>
+          <li>Preventa de enero en presencial y, si el cobro con tarjeta está listo, en online.</li>
+          <li>Contactos de la VSL cuando esté terminada.</li>
+          <li>Informe cada 15 días y reunión mensual.</li>
+        </ul></div>
+        <div class="hz-col"><span class="who">Wild Box</span><ul>
+          <li>Firma antes del 6 de noviembre.</li>
+          <li>Antes del 27 de noviembre: calendario único con huecos fijos, números de WhatsApp Business para los setters y registro de contactos en un CRM.</li>
+          <li>Pasarela o TPV con tarjeta guardada, como muy tarde antes de enero.</li>
+          <li>Fichas completas, testimonios con permiso por escrito y el compromiso de continuidad fijado por escrito.</li>
+          <li>Atender las reuniones y apuntar el resultado en 24 horas.</li>
+        </ul></div>
+        <div class="hz-col gate"><span class="who">Para pasar al medio plazo</span><ul>
+          <li>Respuesta en menos de 5 minutos en horario, y nunca más de 15.</li>
+          <li>Hablar con el 75–80 % o más de los contactos.</li>
+          <li>Todos los contactos registrados en el CRM.</li>
+          <li>Cobro con tarjeta o financiera funcionando.</li>
+          <li>Primeras ventas online y cierre online medido.</li>
+          <li>Revisión conjunta a los 90 días, a principios de marzo.</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="hz">
+      <div class="hz-head"><span class="pill gold">Medio plazo</span><h3>Closer online y crecimiento del online</h3><span class="when">Marzo – septiembre 2027</span></div>
+      <div class="hz-body">
+        <div class="hz-col"><span class="who">Closer Search</span><ul>
+          <li>Entra el closer online por fases: primero escucha tus llamadas, después cierra contigo y al final solo, hasta asumir el 100 % del online.</li>
+          <li>Coste por reunión y por venta según campaña, y objeciones convertidas en mejoras del embudo.</li>
+          <li>Campaña de mayo, la primera de primavera.</li>
+          <li>Preparación del lanzamiento del Premium cuando el Básico tenga resultados.</li>
+        </ul></div>
+        <div class="hz-col"><span class="who">Wild Box</span><ul>
+          <li>Dejar que el closer escuche tus llamadas.</li>
+          <li>Definir el Premium por completo.</li>
+          <li>Conseguir los primeros testimonios online.</li>
+          <li>Subir la inversión en publicidad solo si el coste por venta lo justifica.</li>
+        </ul></div>
+        <div class="hz-col gate"><span class="who">Para que entre el closer y pasar al largo plazo</span><ul>
+          <li>El closer entra cuando el online llegue a 7–8 ventas al mes durante dos meses seguidos (unas 15–20 videollamadas agendadas al mes), o antes si tu agenda se llena.</li>
+          <li>10 o más ventas online al mes de forma estable, con la publicidad necesaria para unos 130–200 contactos online al mes.</li>
+          <li>Cierre del closer cerca del objetivo del 30–40 %, que es un objetivo y no una promesa.</li>
+          <li>Abandono por debajo de 1 de cada 10.</li>
+        </ul></div>
+      </div>
+    </div>
+    <div class="hz">
+      <div class="hz-head"><span class="pill gold">Largo plazo</span><h3>Escalar con datos</h3><span class="when">Octubre 2027 – 2028</span></div>
+      <div class="hz-body">
+        <div class="hz-col"><span class="who">Closer Search</span><ul>
+          <li>Calendario fijo de campañas: preventa en diciembre para enero, mayo, y septiembre con la venta desde mediados de agosto.</li>
+          <li>Premium como segundo escalón de precio.</li>
+          <li>Eventos y retos como fuente de contactos, con formulario y consentimiento.</li>
+          <li>Readaptación y Starter como líneas propias, si se completan.</li>
+        </ul></div>
+        <div class="hz-col"><span class="who">Wild Box</span><ul>
+          <li>Capacidad de servicio para el volumen: entrenadores, nutrición y grupos.</li>
+          <li>Producción de contenido y publicidad acorde.</li>
+          <li>La decisión y la inversión del segundo centro.</li>
+        </ul></div>
+        <div class="hz-col gate"><span class="who">Señales para crecer</span><ul>
+          <li>Coste por venta estable.</li>
+          <li>Closer online autónomo.</li>
+          <li>Presencial lleno con 10 al mes durante dos temporadas: base para un segundo setter local o un segundo centro.</li>
+        </ul></div>
+      </div>
+    </div>
+  </div>
+  <p class="note risk"><b>Si el online no arranca.</b> Si a principios de marzo el online no tiene ventas, el setter online se dedica a la reactivación y al local, el closer no entra y replanteamos el online contigo. Como solo pagas por venta, no te cuesta dinero, pero sí tiempo. Y puedes terminar la colaboración con 30 días de preaviso.</p>
+</div></section>
+
+<section id="equipo" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="07">Cómo trabajará el equipo</span><h2>Tu departamento comercial, llave en mano</h2><p class="intro">Closer Search selecciona, forma y dirige el equipo desde el primer día. David Martínez-Bayer actúa como director comercial del proyecto. Tú te encargas de las reuniones de cierre y de los casos con lesiones o patologías.</p></div>
+  <div class="team">
+    <div class="role"><span class="pill gold">Desde el arranque</span><h4>Setter online</h4><span class="when">Dedicación principal · de 10 a 14 h y de 18 a 20:30 h</span><ul><li>Bienvenida y conversación con los seguidores nuevos de Follow Me Ads. Los que viven en tu radio de 25 km pasan al setter local.</li><li>Recuperación de los más de 2.000 seguidores pendientes de bienvenida, poco a poco.</li><li>Contactos de la VSL que no agendan solos, cuando esté terminada.</li><li>Agenda tus videollamadas de cierre.</li></ul></div>
+    <div class="role"><span class="pill gold">Desde el arranque</span><h4>Setter local</h4><span class="when">Dedicación parcial, no exclusiva</span><ul><li>Contacto en menos de 5 minutos a cada formulario local en horario.</li><li>Cualificación y reunión en el centro dentro del radio de 25 km.</li><li>Recordatorios y seguimiento después de cada reunión.</li><li>Reactivación de los contactos que no se apuntaron.</li></ul></div>
+    <div class="role"><span class="pill warn">Medio plazo</span><h4>Closer online</h4><span class="when">Con 7–8 ventas online al mes durante dos meses, o con tu agenda llena</span><ul><li>Entra poco a poco hasta asumir el 100 % del online.</li><li>Tú sigues con el presencial y los casos con lesiones o patologías.</li><li>No pagas más: sigue siendo el mismo 20 %.</li></ul></div>
+  </div>
+  <p class="faint">Cada contacto tiene un solo responsable en el CRM, para que nadie le escriba dos veces. Para las dudas técnicas (CRM, WhatsApp, pasarela) trabajaremos con un contacto técnico de tu equipo de marketing, para no cargarte a ti.</p>
+
+  <h3>Lo que hace Closer Search desde el primer día</h3>
+  <div class="grid3">
+    <div class="box"><h4>Selección</h4><p>Perfiles cercanos, que entiendan de salud y hábitos, con horario de mañana y tarde.</p></div>
+    <div class="box"><h4>Formación en Wild Box</h4><p>Antes de hablar con nadie, el equipo conoce tus programas, tu método, tu cliente y lo que nunca se dice.</p></div>
+    <div class="box"><h4>Informe operativo</h4><p>El manual del equipo con todo tu negocio: programas, precios, cliente, objeciones, procesos y límites.</p></div>
+    <div class="box"><h4>Guía de llamada interactiva</h4><p>Una herramienta web que guía cada conversación paso a paso, con tus objeciones integradas y la ficha del contacto lista para el CRM.</p></div>
+    <div class="box"><h4>Dirección comercial</h4><p>Supervisión, revisión de conversaciones y llamadas, corrección y formación continua con el método de venta de Closer Search.</p></div>
+    <div class="box"><h4>Informes y reunión</h4><p>Informe cada 15 días con cada contacto, su canal, su estado, si llegó a la reunión y el resultado. Reunión mensual.</p></div>
+  </div>
+
+  <h3>Tu agenda</h3>
+  <p class="dim">Hoy tienes huecos el lunes de 11 a 13, martes y miércoles de 16 a 18, viernes de 18 a 19 o sábado por la mañana, y algún hueco a las 9:00. Tu público responde mejor de 10 a 14 y de 18 a 20:30. Te proponemos:</p>
+  <ul class="dim">
+    <li>Si te encaja, un bloque fijo de videollamadas online a última hora de la tarde un día a la semana, que es cuando más contesta tu cliente.</li>
+    <li>Todos tus huecos en un solo calendario, Calendly o Google Calendar, con 15 minutos entre reuniones, huecos separados para presencial y online, un máximo de reuniones por día y conexión con la VSL y los setters.</li>
+    <li>Revisar cada quincena cuántas reuniones atiendes, para ajustar la publicidad a tus huecos reales.</li>
+  </ul>
+
+  <h3>Lo que mediremos cada 15 días</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Indicador</th><th>Hoy</th><th>Lo que buscamos</th></tr></thead>
+    <tbody>
+      <tr><td>Tiempo de primera respuesta en horario</td><td>1–2 días</td><td>Menos de 5 minutos; nunca más de 15</td></tr>
+      <tr><td>Contactos con los que se consigue hablar</td><td>50 %</td><td>75–80 % o más</td></tr>
+      <tr><td>Reuniones agendadas y presentadas</td><td>10–15 y 7–12 de cada 100</td><td>Subir las dos y reducir ausencias</td></tr>
+      <tr><td>Contactos que no encajan, por campaña</td><td>Sin medir</td><td>Medido y compartido con tu equipo de marketing</td></tr>
+      <tr><td>Ventas por programa y canal</td><td>Sin medir por canal</td><td>Cada venta con su origen</td></tr>
+      <tr><td>Motivos por los que no se apuntan</td><td>Sin registrar</td><td>Registrados y convertidos en mejoras</td></tr>
+      <tr><td>Tu cierre presencial</td><td>3 de cada 5</td><td>Mantenerlo</td></tr>
+      <tr><td>Tu cierre online</td><td>Sin medir</td><td>Medido desde la primera videollamada</td></tr>
+      <tr><td>Ventas cobradas por completo</td><td>Sin medir</td><td>Impagos por debajo de 1 de cada 10</td></tr>
+    </tbody>
+  </table></div>
+  <p class="faint">Son objetivos de trabajo, no resultados prometidos.</p>
+</div></section>
+
+<section id="marketing" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="08">Marketing y equipo de cierre</span><h2>Un mismo circuito con tu marketing</h2><p class="intro">Las campañas generan contactos a unos 10 € en local y hacen crecer la comunidad a céntimos por seguidor con Follow Me Ads. El equipo de cierre se encarga de convertir ese trabajo en reuniones y ventas, y de devolver a tu equipo de marketing lo que aprende en cada conversación.</p></div>
+  <div class="grid2">
+    <div class="box"><h4>Lo que el equipo necesita del marketing</h4><ul class="dim">
+      <li>Formulario de mayor intención con 4 preguntas: objetivo, presencial u online, horas disponibles y desde cuándo. Las lesiones y la salud las pregunta el setter, con consentimiento, nunca el formulario de Meta.</li>
+      <li>Aviso instantáneo de cada contacto al setter, en el CRM.</li>
+      <li>Origen de cada contacto (campaña y anuncio) para saber qué creativo trae ventas.</li>
+      <li>Mensaje de bienvenida automático con una herramienta oficial de Meta.</li>
+      <li>Vídeos y casos con permiso para acompañar al contacto hasta la reunión.</li>
+      <li>Agenda única conectada a la VSL.</li>
+    </ul></div>
+    <div class="box hl"><h4>Lo que el equipo devuelve al marketing</h4><ul class="dim">
+      <li>Contactos, reuniones, asistencias y ventas por campaña y por creativo.</li>
+      <li>Coste por reunión y coste por venta, la métrica que proponemos optimizar juntos.</li>
+      <li>Las objeciones más frecuentes y su peso.</li>
+      <li>Frases literales de los clientes para inspirar los anuncios, adaptadas a las políticas de Meta: sin aludir al peso o la salud de quien lo lee y sin fotos de antes y después.</li>
+      <li>Horas en las que más se contesta.</li>
+      <li>Media hora al mes para decidir qué escalar, qué apagar y qué objeción convertir en anuncio.</li>
+    </ul></div>
+  </div>
+  <h3>Reactivación en tres fases, sin gastar más en anuncios</h3>
+  <div class="timeline">
+    <div class="tl"><span class="when">Fase 1 · desde el arranque, de forma continua</span><p>Bienvenida personal del setter: primero a los seguidores nuevos de cada día, en menos de 48 horas, y después a los de los últimos 30–60 días. Empezamos con unos 30 mensajes diarios de la bolsa pendiente y subimos poco a poco, siempre a mano y desde la bandeja de Meta Business, con acceso propio de cada setter.</p></div>
+    <div class="tl"><span class="when">Fase 2</span><p>Para los seguidores más antiguos, historias y reels con una palabra clave que abre la conversación. Es el seguidor quien escribe.</p></div>
+    <div class="tl"><span class="when">Fase 3</span><p>Contactos que no se apuntaron y antiguos clientes presenciales con consentimiento documentado para recibir comunicaciones comerciales por ese canal; el permiso para atender su solicitud no basta. Con un motivo nuevo y real: online para quien no tenía tiempo, pago fraccionado para quien no podía pagar, online o mantenimiento para antiguos clientes, y el arranque de enero para todos. Un mensaje y como mucho un seguimiento, con opción de baja. En WhatsApp, el primer mensaje fuera de las 24 horas va con una plantilla aprobada por Meta.</p></div>
+  </div>
+  <p class="faint">Te proponemos fijar con tu equipo de marketing la fecha del cambio de nombre previsto con el rebranding: antes del 1 de diciembre o en junio–julio, fuera de las campañas de enero y mayo, para que setters, WhatsApp, VSL y anuncios salgan ya con la marca definitiva.</p>
+</div></section>
+
+<section id="condiciones" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="09">Condiciones económicas</span><h2>Solo cobramos cuando el equipo vende</h2></div>
+  <div class="big20">
+    <span class="n">20 %</span>
+    <div class="t">
+      <p class="dim">sobre la <b>base imponible</b> de cada venta que cierre el equipo, calculada sobre el precio total pactado con el cliente, pague al contado, a plazos o financiado.</p>
+      <ul class="checks">
+        <li>Sin cuota fija ni pagos por adelantado.</li>
+        <li>Es la remuneración total del equipo de cierre: setters, closer online y dirección comercial. Cuando entre el closer, no pagas más.</li>
+        <li>Mantenimientos y renovaciones son tuyos y no llevan comisión: cada cliente nuevo te deja después cuotas mensuales sin comisión.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="note"><b>Es más que el 15 % que comentaste, y lo sabemos.</b> La diferencia es que el 20 % lo cubre todo: los dos setters, el closer online cuando entre, la dirección comercial, la guía de llamada, la reactivación y los informes, sin que tu coste suba cuando delegues el cierre. Y en local, donde cierras tú, no pagas por lo que ya vendes: con 8 ventas locales en un mes pagarías unos 99 €, frente a unos 298 € si fuera un 15 % sobre todas.</p>
+
+  <h3>Lo que supone en cada venta</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Programa</th><th class="n">Precio IVA incl.</th><th class="n">Base imponible</th><th class="n">Comisión 20 %</th><th class="n">Te queda (base)</th></tr></thead>
+    <tbody>
+      <tr><td>Reto presencial (mínimo)</td><td class="n">250 €</td><td class="n">206,61 €</td><td class="n">41,32 €</td><td class="n">165,29 €</td></tr>
+      <tr><td>Reto presencial</td><td class="n">300 €</td><td class="n">247,93 €</td><td class="n">49,59 €</td><td class="n">198,35 €</td></tr>
+      <tr><td>Grupo terapéutico</td><td class="n">390 €</td><td class="n">322,31 €</td><td class="n">64,46 €</td><td class="n">257,85 €</td></tr>
+      <tr><td>Online Básico (mínimo)</td><td class="n">499 €</td><td class="n">412,40 €</td><td class="n">82,48 €</td><td class="n">329,92 €</td></tr>
+      <tr><td>Online Básico</td><td class="n">540 €</td><td class="n">446,28 €</td><td class="n">89,26 €</td><td class="n">357,02 €</td></tr>
+      <tr><td>Online Premium (mínimo)</td><td class="n">999 €</td><td class="n">825,62 €</td><td class="n">165,12 €</td><td class="n">660,50 €</td></tr>
+      <tr><td>Online Premium</td><td class="n">1.150 €</td><td class="n">950,41 €</td><td class="n">190,08 €</td><td class="n">760,33 €</td></tr>
+    </tbody>
+  </table></div>
+  <p class="faint">Calculado suponiendo que tus precios incluyen el IVA del 21 % [DATO PENDIENTE: confírmalo]. Nuestra factura lleva un 21 % de IVA, que por lo general podrás deducirte si tu actividad tributa con IVA: confírmalo con tu gestor.</p>
+
+  <h3>Tus 3 primeras ventas del formulario, sin comisión</h3>
+  <p class="dim">Hoy cierras 6–7 ventas locales al mes. Según tu embudo, unas 3 llegan por el formulario; el resto viene de orgánico, eventos y derivaciones. No queremos cobrar por lo que ya vendes. Por eso proponemos:</p>
+  <ul class="dim">
+    <li><b>Las 3 primeras ventas locales de cada mes de contactos del formulario que trabaje el equipo no llevan comisión.</b> A partir de la cuarta, sí.</li>
+    <li>Tus ventas por orgánico, eventos y derivaciones que cierres sin el equipo quedan fuera.</li>
+    <li>Las ventas de contactos reactivados (personas que no se apuntaron y antiguos clientes) llevan comisión desde la primera, porque hoy no se trabajan.</li>
+    <li>En online, todas las ventas llevan comisión, porque hoy parte de cero.</li>
+    <li>A los 90 días lo revisamos con el dato real del CRM.</li>
+  </ul>
+  <div class="tbl"><table>
+    <thead><tr><th>Ejemplo de mes</th><th class="n">Ventas locales del formulario</th><th class="n">Con comisión</th><th class="n">Ventas online</th><th class="n">Comisión total aprox.</th></tr></thead>
+    <tbody>
+      <tr><td>Como hoy</td><td class="n">3</td><td class="n">0</td><td class="n">0</td><td class="n">0 €</td></tr>
+      <tr><td>Arranque en diciembre</td><td class="n">5</td><td class="n">2</td><td class="n">0</td><td class="n">≈99 €</td></tr>
+      <tr><td>Con el online en marcha</td><td class="n">6</td><td class="n">3</td><td class="n">4 Básico</td><td class="n">≈506 €</td></tr>
+      <tr class="hl"><td>Tu objetivo</td><td class="n">7</td><td class="n">4</td><td class="n">10 Básico</td><td class="n">≈1.091 €</td></tr>
+    </tbody>
+  </table></div>
+  <p class="faint">Aparte, tus 3–4 ventas mensuales por orgánico, eventos y derivaciones, sin comisión. Ejemplos con el reto a 300 € y el Básico a 540 €. No son una previsión: el resultado del online está por demostrar.</p>
+
+  <h3>Reglas claras desde el primer día</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Concepto</th><th>Cómo funciona</th></tr></thead>
+    <tbody>
+      <tr><td><b>Qué ventas llevan comisión</b></td><td>Las ventas online, las locales de contactos del formulario a partir de la cuarta del mes y las de contactos reactivados, siempre que el equipo haya mantenido una conversación con respuesta o haya agendado la reunión, con fecha en el CRM. Cuenta la venta cerrada en los 60 días siguientes. Un mensaje sin respuesta no genera atribución. Venta local es la de un programa presencial.</td></tr>
+      <tr><td><b>Qué queda fuera</b></td><td>Mantenimientos y renovaciones, clientes que ya están activos al empezar (se listan en un anexo), ampliaciones por el compromiso de continuidad y ventas por orgánico, eventos o derivaciones que cierres sin intervención del equipo.</td></tr>
+      <tr><td><b>Cuándo se considera cerrada</b></td><td>Cuando el cliente acepta por escrito y paga la reserva con el plan de pago acordado, o cuando se aprueba la financiación. Las ventas por teléfono o videollamada solo son firmes con la confirmación escrita del cliente. La comisión se calcula sobre el precio total pactado, también si hay financiera.</td></tr>
+      <tr><td><b>Si el cliente desiste o deja de pagar</b></td><td>Si en una venta a distancia el cliente desiste válidamente y le reembolsas, la comisión se anula o se reduce en la misma proporción, y se regulariza en la liquidación siguiente. Si abandona después, la comisión se mantiene. Por eso te recomendamos cobrar con financiera o con tarjeta guardada: con cuotas propias, el riesgo de impago es tuyo.</td></tr>
+      <tr><td><b>Liquidación</b></td><td>Mensual. En los 5 primeros días del mes, Closer Search te envía el listado de ventas con comisión según el CRM; tienes 5 días para revisarlo con los justificantes de reserva o financiación. Después se emite la factura, pagadera en 10 días.</td></tr>
+      <tr><td><b>Duración</b></td><td>Sin exclusividad para ninguna de las dos partes. Revisión conjunta a los 90 días de la estructura, las ventas sin comisión y la entrada del closer, nunca para subir el porcentaje. Preaviso de 30 días para terminar. Durante el preaviso rigen las reglas habituales; tras la terminación, llevan comisión las reuniones agendadas por el equipo hasta esa fecha que se cierren en los 30 días siguientes.</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="limites" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="10">Lo que diremos y lo que no</span><h2>Cuidar a tu cliente y tu marca</h2><p class="intro">En salud y pérdida de peso, una frase de más puede costar la confianza del cliente y problemas con la publicidad. El equipo trabajará con estas reglas, que aprobarás por escrito.</p></div>
+  <div class="grid2">
+    <div class="box"><h4>Lo que diremos</h4><ul class="checks">
+      <li>«Cada cuerpo responde distinto. En la valoración inicial fijamos contigo objetivos realistas.»</li>
+      <li>«No es una dieta: es educación nutricional, con una guía flexible que se adapta a tu vida y a tu familia.»</li>
+      <li>«Necesitas entre 2 y 4 horas a la semana, adaptadas a tu tiempo.»</li>
+      <li>«Seguimiento semanal y corrección de técnica por vídeo.»</li>
+      <li>«Medimos tu avance en fuerza, medidas y cómo te sientes, no solo en la báscula.»</li>
+      <li>«Trabajamos con ejercicio adaptado a tu lesión y a tu nivel, y nos coordinamos con tu fisio o tu médico si hace falta.»</li>
+      <li>«Más de 110 personas han pasado por el programa presencial en cinco años.»</li>
+      <li>Plazas limitadas, solo en presencial y cuando sea verdad.</li>
+    </ul></div>
+    <div class="box"><h4>Lo que no diremos</h4><ul class="checks no">
+      <li>Kilos concretos ni rangos de kilos.</li>
+      <li>«Garantizado» ni «resultados asegurados».</li>
+      <li>«Curar», «tratar patologías», «quitar el dolor», «rehabilitación» o «fisioterapia».</li>
+      <li>Suplementación o «dieta milagro».</li>
+      <li>Que quedan pocas plazas en el online, donde hay sitio para 30–40.</li>
+      <li>Que el online «funciona mejor» que el presencial, mientras no haya clientes que lo demuestren.</li>
+      <li>El nombre de clínicas u hospitales que te derivan, sin su autorización.</li>
+    </ul></div>
+  </div>
+  <div class="grid2">
+    <div class="box hl"><h4>Compromiso de continuidad</h4><p>Proponemos llamar así a lo que hoy presentas como garantía de resultados, y dejarlo escrito antes del arranque: «Si cumples el plan y a los 3 meses no hay cambios medibles, te acompañamos 3 meses más sin coste. No incluye devolución de dinero, sin perjuicio del derecho legal de desistimiento.» Hay que fijar qué es cumplir el plan y qué son cambios medibles.</p></div>
+    <div class="box"><h4>Cuándo pasa el caso a ti</h4><p>Antes de agendar, el setter hace una sola pregunta cerrada: «¿Tienes alguna lesión, enfermedad, embarazo o parto reciente, medicación o situación de salud que quieras que José Antonio valore antes de empezar?». Si es que sí, no agenda la venta y te pasa el caso, sin pedir ni anotar detalles en el CRM ni en WhatsApp. Solo se agenda a mayores de edad, y la cardiopatía queda excluida del online. Si hay sospecha de un trastorno de la conducta alimentaria, se recomienda valoración sanitaria antes de empezar.</p></div>
+  </div>
+  <p class="faint">El equipo se presenta con su nombre, como parte del equipo de Wild Box, desde números de WhatsApp Business de Wild Box para que los datos se queden contigo. En presencial, el setter no cierra el programa: en la valoración decides tú si encaja el reto o el grupo terapéutico. Conviene que un abogado revise la información de desistimiento de las ventas a distancia, el tratamiento de los datos de salud y lo que puede ofrecer cada perfil profesional.</p>
+</div></section>
+
+<section id="cuadrar" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="11">Datos que cuadraremos juntos</span><h2>Para que todos digamos lo mismo</h2><p class="intro">Al analizar tus respuestas hemos visto algunos datos que aparecen de dos formas. Es normal en un primer cuestionario, pero el equipo, los anuncios y la VSL tienen que decir lo mismo.</p></div>
+  <div class="tbl"><table>
+    <thead><tr><th>Tema</th><th>Lo que aparece</th><th>Lo que proponemos</th></tr></thead>
+    <tbody>
+      <tr><td>Pérdida de peso</td><td>Dos rangos distintos de kilos</td><td>No dar cifras. El online aún no tiene clientes para respaldarlas.</td></tr>
+      <tr><td>Garantía</td><td>«Garantía de resultados» y «devolución no hay»</td><td>El compromiso de continuidad, por escrito.</td></tr>
+      <tr><td>Nutrición</td><td>Guía con cantidades personalizadas y «nutricionista personal» en el Premium</td><td>Confirmar quién la elabora en cada programa y su titulación: dietista-nutricionista es una profesión sanitaria regulada.</td></tr>
+      <tr><td>Clientes presenciales activos</td><td>12 en una respuesta y 8 en otra</td><td>Fijar la cifra de partida y listarlos.</td></tr>
+      <tr><td>Ventas y embudo</td><td>El formulario daría unas 3–4 ventas al mes, pero son 6–7</td><td>Confirmar cuántas vienen de orgánico, eventos y derivaciones.</td></tr>
+      <tr><td>Follow Me Ads</td><td>«40 leads diarios»</td><td>Hacen crecer la comunidad; proponemos medirlos también por conversaciones y reuniones.</td></tr>
+      <tr><td>Premium</td><td>999 €, 1.050–1.150 € y precio por confirmar</td><td>Precio final y qué incluye frente al Básico.</td></tr>
+      <tr><td>Mantenimiento online</td><td>«100 €»</td><td>Aclarar si es al mes y hacer una tabla única de mantenimiento.</td></tr>
+      <tr><td>Objetivo online</td><td>10 al mes en 3 meses y 10–20 al mes en 12 meses</td><td>Fijarlo en la revisión de los 90 días, con datos.</td></tr>
+      <tr><td>Venta cerrada</td><td>«Cuando está el pago completo»</td><td>Aceptación por escrito con reserva y plan de pago, o financiación aprobada.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="dim">También nos faltan: las herramientas que usas hoy, la lista de antiguos clientes que aún no nos has pasado, otras objeciones frecuentes, palabras que no quieres que usemos, los vídeos de testimonios y cómo y cuándo nos enviarás los materiales.</p>
+</div></section>
+
+<section id="pasos" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="12">Próximos pasos</span><h2>Lista de tareas con fecha límite</h2><p class="intro">Todas las tareas de ambas partes, con su responsable y su fecha. Las marcadas como imprescindibles son las que necesitamos para arrancar el 1 de diciembre. Lo técnico (CRM, WhatsApp, pasarela y plantillas) lo puede llevar tu equipo de marketing; de ti necesitamos las decisiones y una sesión con los setters.</p></div>
+  <div class="tbl"><table class="tasks">
+    <thead><tr><th>Tarea</th><th>Responsable</th><th>Fecha límite</th><th>Imprescindible</th></tr></thead>
+    <tbody><tr class="grp"><td colspan="4">Antes de la firma</td></tr><tr><td>Reunión para repasar este diagnóstico (1 h)</td><td>Ambos</td><td class="when-c">Mar 27 oct</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Envío del contrato de colaboración y del contrato de encargado del tratamiento</td><td>Closer Search</td><td class="when-c">Vie 30 oct</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Firma de los dos contratos</td><td>Wild Box</td><td class="when-c">Vie 6 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Envío de materiales: tarifas, fichas, testimonios con permiso y accesos</td><td>Wild Box</td><td class="when-c">Vie 6 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Nombrar a una persona de tu equipo de marketing como contacto técnico</td><td>Wild Box</td><td class="when-c">Vie 6 nov</td><td><span class="pill ok">Sí</span></td></tr><tr class="grp"><td colspan="4">Noviembre: preparación</td></tr><tr><td>Decisiones: precio del Premium, huecos fijos y texto del compromiso de continuidad</td><td>Wild Box</td><td class="when-c">Vie 13 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Fecha del cambio de nombre del rebranding</td><td>Wild Box</td><td class="when-c">Vie 13 nov</td><td><span class="pill gold">No</span></td></tr><tr><td>Solicitud de la financiera y de la pasarela con tarjeta guardada</td><td>Wild Box</td><td class="when-c">Vie 13 nov</td><td><span class="pill gold">No</span></td></tr><tr><td>Selección de los dos setters</td><td>Closer Search</td><td class="when-c">Vie 20 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Borrador del informe operativo</td><td>Closer Search</td><td class="when-c">Vie 20 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Plantillas de WhatsApp enviadas a Meta para su aprobación</td><td>Wild Box</td><td class="when-c">Vie 20 nov</td><td><span class="pill gold">No</span></td></tr><tr><td>Revisión del informe operativo y aprobación de «lo que diremos y lo que no»</td><td>Wild Box</td><td class="when-c">Mar 24 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Sesión tuya con los setters (1,5 h)</td><td>Ambos</td><td class="when-c">Mié 25 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Calendario único, números de WhatsApp Business de Wild Box y CRM con etapas, origen y accesos</td><td>Wild Box</td><td class="when-c">Vie 27 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Lista de clientes activos para el anexo del contrato</td><td>Wild Box</td><td class="when-c">Vie 27 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Guía de llamada interactiva terminada y setters formados</td><td>Closer Search</td><td class="when-c">Vie 27 nov</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Listas de contactos para reactivar, con su consentimiento</td><td>Wild Box</td><td class="when-c">Vie 27 nov</td><td><span class="pill gold">No</span></td></tr><tr><td>Prueba completa del circuito: formulario, aviso, setter, agenda y recordatorio</td><td>Ambos</td><td class="when-c">Lun 30 nov</td><td><span class="pill ok">Sí</span></td></tr><tr class="grp"><td colspan="4">Arranque</td></tr><tr><td>Arranque: local, bienvenida a seguidores y preventa de enero</td><td>Closer Search</td><td class="when-c">Mar 1 dic</td><td><span class="pill ok">Sí</span></td></tr><tr><td>Primer repaso rápido de cómo va (15 min)</td><td>Ambos</td><td class="when-c">Vie 11 dic</td><td><span class="pill gold">No</span></td></tr><tr><td>Plan de Navidad: cobertura de los setters y tus huecos del 24 dic al 6 ene</td><td>Ambos</td><td class="when-c">Vie 18 dic</td><td><span class="pill gold">No</span></td></tr><tr><td>Pasarela con tarjeta guardada funcionando (la preventa online depende de ella)</td><td>Wild Box</td><td class="when-c">Vie 18 dic · como tarde jue 31 dic</td><td><span class="pill gold">No</span></td></tr><tr class="grp"><td colspan="4">Enero a marzo</td></tr><tr><td>Informes quincenales: 15 dic, 31 dic, 15 ene, 29 ene, 12 feb y 26 feb</td><td>Closer Search</td><td class="when-c">Esas fechas</td><td>—</td></tr><tr><td>Listado de ventas con comisión de diciembre</td><td>Closer Search</td><td class="when-c">Mar 5 ene</td><td>—</td></tr><tr><td>Revisión del listado por tu parte</td><td>Wild Box</td><td class="when-c">Lun 11 ene</td><td>—</td></tr><tr><td>Reuniones mensuales</td><td>Ambos</td><td class="when-c">Vie 8 ene y vie 5 feb</td><td>—</td></tr><tr><td>Apuntar el resultado de cada reunión en 24 horas</td><td>Wild Box</td><td class="when-c">Siempre</td><td>—</td></tr><tr><td>Entrada de la VSL cuando esté terminada</td><td>Ambos</td><td class="when-c">Según vuestro calendario</td><td><span class="pill gold">No</span></td></tr><tr><td>Primeros testimonios online con permiso por escrito</td><td>Wild Box</td><td class="when-c">Vie 26 feb</td><td><span class="pill gold">No</span></td></tr><tr class="grp"><td colspan="4">Revisión a los 90 días</td></tr><tr><td>Envío de los datos de 90 días: embudo, cierre online y ventas sin comisión</td><td>Closer Search</td><td class="when-c">Vie 26 feb</td><td>—</td></tr><tr><td>Revisión conjunta: closer online, ventas sin comisión, objetivo online y Premium</td><td>Ambos</td><td class="when-c">Mié 3 mar</td><td>—</td></tr></tbody>
+  </table></div>
+  <div class="grid2">
+    <div class="box"><h4>Tu tiempo en noviembre</h4><p>Entre 8 y 10 horas en total, unas 2–2,5 horas a la semana: la reunión de presentación (1 h), el contrato (1 h), las decisiones (1,5 h), los materiales (2 h), revisar el informe operativo y las reglas (1,5 h), la sesión con los setters (1,5 h) y la prueba del circuito (0,5 h). A partir de diciembre bajas a 1–2 horas semanales, sin contar las reuniones de cierre.</p></div>
+    <div class="box"><h4>Navidad y festivos</h4><p>La preventa de enero coincide con el 24–26 y el 31 de diciembre y el 1 y el 6 de enero. Antes del 18 de diciembre fijaremos contigo quién atiende cada día y qué huecos tienes. El lunes 7 y el martes 8 de diciembre son festivos, así que no contaremos con reuniones de cierre esos días.</p></div>
+  </div>
+  <p class="note"><b>Para arrancar el 1 de diciembre</b> son imprescindibles el calendario único, los números de WhatsApp Business y el registro de contactos. Si falta algo, retrasamos lo mínimo, porque la preventa de enero empieza en diciembre. Hasta que esté la pasarela, la reserva presencial puede seguir por Bizum como hoy.</p>
+</div></section>
+<section id="anexo" class="band"><div class="inner">
+  <div class="shead"><span class="tag" data-n="13">Anexo</span><h2>Cómo hablará el equipo con tu cliente</h2><p class="intro">De aquí saldrá la guía de llamada de Wild Box. Todo procede de tus respuestas.</p></div>
+  <div class="grid2">
+    <div class="box"><h4>Tu cliente</h4><p>Sobre todo mujer de 30 a 50 años, con hijos y trabajo; en presencial, hasta los 65. Ha hecho poco deporte, ha cogido kilos con los cambios hormonales y arrastra efecto rebote. Quiere bajar de peso, sentirse mejor y quitarse el dolor.</p></div>
+    <div class="box"><h4>Quién decide y en cuánto tiempo</h4><p>Ella, normalmente con la pareja. Cuando se la llama en 24–48 horas, se cierra en la propia reunión. Si menciona a la pareja, se le propone que esté en la reunión.</p></div>
+  </div>
+  <h3>Sus palabras</h3>
+  <div class="chips">
+    <span>«Estoy muy flojo o floja»</span><span>«No tengo nada de fuerza, me siento débil»</span><span>«Me duele todo»</span><span>«Cogí kilos y no he conseguido quitármelos»</span><span>«Estoy muy agobiado»</span><span>«Llego a casa cansada y como cualquier cosa»</span><span>«No sé qué hacer para quitarme esto»</span><span>«Nunca me ha gustado entrenar»</span><span>«Fui al gimnasio y me quité a los dos meses»</span>
+  </div>
+  <h3>Secuencia de contacto</h3>
+  <ol class="dim">
+    <li><b>Primer contacto en menos de 5 minutos en horario:</b> llamada y WhatsApp. El setter se presenta con su nombre, del equipo de Wild Box. En Instagram, el primer contacto es por mensaje directo y se pasa a WhatsApp antes de agendar.</li>
+    <li><b>Si no responde:</b> otra llamada a las 2 horas, dos intentos al día siguiente (de 10 a 14 y de 18 a 20:30), otro a los 3 días y un último mensaje a los 7. Hasta 6 intentos antes de marcarlo como no localizado.</li>
+    <li><b>Cualificación:</b> objetivo, cuánto tiempo lleva así y por qué ahora, si tiene 2–4 horas a la semana, radio de 25 km para el presencial y quién más decide. La capacidad de pago se pregunta con suavidad.</li>
+    <li><b>Pregunta de derivación,</b> con su consentimiento. Si es que sí, el caso pasa a ti.</li>
+    <li><b>Agenda:</b> dos huecos concretos en las próximas 24–48 horas. A quien reserva solo por la VSL, el setter le llama para confirmar.</li>
+    <li><b>Recordatorios:</b> confirmación al agendar, recordatorio a las 24 horas con un caso real autorizado y otro 2 horas antes con la dirección o el enlace.</li>
+    <li><b>Después de tu reunión:</b> el setter envía el agradecimiento el mismo día y, si estaba en duda, hace el seguimiento a las 24 horas, a los 3 días, a la semana y a los 15 días, con el motivo de no compra registrado.</li>
+  </ol>
+  <h3>Objeciones reales y cómo las trabajaremos</h3>
+  <p class="dim">El setter trabaja las objeciones para llegar a la reunión; las del cierre las trabajas tú con la misma guía.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Lo que dicen</th><th>Cómo se trabaja</th></tr></thead>
+    <tbody>
+      <tr><td>«¿Cuánto cuesta?» o «pásame la información por aquí»</td><td>Depende del plan que diseñéis en la reunión. Si insiste: desde 300 € en presencial y desde 499 € en online, con pago fraccionado. El objetivo es la reunión. [Pendiente de tu aprobación]</td></tr>
+      <tr><td>«Es caro» o «ahora no me lo puedo permitir»</td><td>Entender qué ha probado antes y ofrecer el pago fraccionado. Sin prometer resultados: se explica el compromiso de continuidad tal como está escrito.</td></tr>
+      <tr><td>«No tengo tiempo»</td><td>Preguntar de cuánto tiempo dispone de verdad y mostrar cómo el plan se adapta a 2–4 horas a la semana.</td></tr>
+      <tr><td>«Lo tengo que pensar» o «lo tengo que hablar con mi pareja»</td><td>Proponer que la pareja esté en la reunión desde el principio, sin presionar.</td></tr>
+      <tr><td>«Ya he probado mil dietas»</td><td>No es una dieta: es educación nutricional con una guía flexible. Se explica antes de que aparezca la objeción.</td></tr>
+      <tr><td>«¿El online funciona igual que el presencial?»</td><td>Se explica el método: plan individual, corrección por vídeo y revisión semanal. No se compara con el presencial hasta tener clientes online.</td></tr>
+      <tr><td>«¿Cuántos kilos voy a perder?»</td><td>«Cada persona es distinta. En la valoración inicial fijamos contigo un objetivo realista.» Sin cifras.</td></tr>
+      <tr><td>«No sé si voy a ser capaz»</td><td>Para eso está el acompañamiento: empezar desde su nivel, con seguimiento semanal y una comunidad.</td></tr>
+      <tr><td>«Un gimnasio low cost o el fisio me sale más barato»</td><td>No se compite en precio: el gimnasio da instalaciones; el fisio trata la lesión y Wild Box continúa con el entrenamiento para que no vuelva, coordinado con él si hace falta.</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="sign">
+    <p class="dim">Gracias por la confianza y por el detalle de tus respuestas, José Antonio. Este es nuestro diagnóstico honesto: empezar con lo que ya funciona para que ninguna persona que ha levantado la mano se quede sin respuesta, y construir paso a paso, con datos, un departamento comercial que en unos meses cierre sin ti.</p>
+    <span class="name">David Martínez-Bayer</span>
+    <span class="faint">CEO y Fundador de Closer Search · david@closersearch.com · +34 663 347 696 · www.closersearch.com</span>
+  </div>
+  <p class="foot" hidden>Closer Search · Informe de diagnóstico elaborado por Closer Search exclusivamente para Wild Box, a partir del cuestionario de colaboración del 24 de octubre de 2026 y de la llamada de presentación. Documento confidencial. Los ejemplos económicos son orientativos y no constituyen una promesa de resultados.</p>
+</div></section>
+
+</main>
+<footer class="site-footer">
+  <div class="ft-grid">
+    <div class="ft-brand"><a class="logo" href="#top"><svg viewBox="0 0 100 100" fill="none" aria-hidden="true"><polygon points="50,4 90,26 90,74 50,96 10,74 10,26" stroke="#C9A84C" stroke-width="3" fill="#060606"/><polygon points="50,16 79,32 79,68 50,84 21,68 21,32" stroke="#8E763A" stroke-width="1.2" fill="none"/><path d="M33 50 L45 62 L69 36" stroke="#C9A84C" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="logo-text"><span class="brand-name">CLOSER<span class="search"> SEARCH</span></span><span class="logo-sub">Selección de talento de cierre</span></span></a><p>Construimos departamentos comerciales que cierran sin ti. Seleccionamos, formamos y dirigimos equipos de cierre.</p></div>
+    <div><h5>Contacto</h5><span>david@closersearch.com</span><span>+34 663 347 696</span><a href="https://www.closersearch.com" target="_blank" rel="noopener">www.closersearch.com</a></div>
+    <div><h5>Firma</h5><span class="ft-sign">David Martínez-Bayer</span><span>CEO y Fundador de Closer Search</span></div>
+  </div>
+  <div class="ft-bottom">Closer Search · Informe de diagnóstico elaborado por Closer Search exclusivamente para Wild Box, a partir del cuestionario de colaboración del 24 de octubre de 2026 y de la llamada de presentación. Documento confidencial. Los ejemplos económicos son orientativos y no constituyen una promesa de resultados.</div>
+</footer>
+<script>
+document.getElementById('mt').addEventListener('click',function(){document.body.classList.toggle('menu-open')});
+document.getElementById('sn').addEventListener('click',function(e){if(e.target.closest('a'))document.body.classList.remove('menu-open')});
+
+/* Etiquetas de tabla para móvil + espacios duros en cifras (sin tocar el texto) */
+document.querySelectorAll('.tbl table').forEach(function(t){
+  var h=[].map.call(t.querySelectorAll('thead th'),function(th){return th.textContent.trim()});
+  t.querySelectorAll('tbody tr').forEach(function(tr){var i=0;[].forEach.call(tr.children,function(td){
+    if(h[i]&&!td.hasAttribute('data-label'))td.setAttribute('data-label',td.colSpan>1?h.slice(i,i+td.colSpan).join(' / '):h[i]);i+=td.colSpan||1;});});
+});
+(function(){var w=document.createTreeWalker(document.querySelector('main')||document.body,NodeFilter.SHOW_TEXT),n;
+while(n=w.nextNode()){var s=n.data.replace(/(\d) (%|€)/g,'$1 $2').replace(/(\d)–(\d)/g,'$1–⁠$2');if(s!==n.data)n.data=s;}})();
+
+(function(){var mt=document.getElementById('mt');if(!mt)return;mt.setAttribute('aria-controls','sn');mt.setAttribute('aria-expanded','false');
+function sync(){var o=document.body.classList.contains('menu-open');mt.setAttribute('aria-expanded',o);mt.setAttribute('aria-label',o?'Cerrar el menú':'Abrir el menú');}
+new MutationObserver(sync).observe(document.body,{attributes:true,attributeFilter:['class']});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('menu-open')){document.body.classList.remove('menu-open');mt.focus();}});})();
+</script>
+
+</body>
+</html>
